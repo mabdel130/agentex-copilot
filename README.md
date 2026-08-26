@@ -3,7 +3,7 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -19,7 +19,16 @@ copilot plugin install mabdel130/agentex-copilot
 
 That's it — this is a real [GitHub Copilot CLI plugin](https://docs.github.com/en/copilot/concepts/agents/about-plugins):
 a `plugin.json` manifest plus `agents/*.agent.md` role definitions, installed the same way you'd
-install any other Copilot CLI plugin. No Copilot CLI yet? See
+install any other Copilot CLI plugin. It also self-hosts its own marketplace
+([`.github/plugin/marketplace.json`](./.github/plugin/marketplace.json)) if you'd rather go
+through that flow:
+
+```bash
+copilot plugin marketplace add mabdel130/agentex-copilot
+copilot plugin install agentex-copilot@agentex-copilot
+```
+
+No Copilot CLI yet? See
 [**No Copilot CLI? Use the fallback installer**](#no-copilot-cli-use-the-fallback-installer) below.
 
 > Earlier versions of this README claimed GitHub Copilot had no real plugin system at all and
@@ -172,10 +181,11 @@ Full policy: [`docs/ai/security-policy.md`](./docs/ai/security-policy.md) ·
 
 ```
 agentex-copilot/
-├── plugin.json                 # real Copilot CLI plugin manifest
-├── agents/                     # test-orchestrator + qa-executor role definitions
-├── scripts/install.js          # fallback installer for non-CLI Copilot Chat users
-├── templates/                  # AGENTS.md / copilot-instructions.md used by the fallback installer
+├── plugin.json                     # real Copilot CLI plugin manifest
+├── .github/plugin/marketplace.json # self-hosted marketplace listing this one plugin
+├── agents/                         # test-orchestrator + qa-executor role definitions
+├── scripts/install.js              # fallback installer for non-CLI Copilot Chat users
+├── templates/                      # AGENTS.md / copilot-instructions.md used by the fallback installer
 ├── docs/
 │   ├── getting-started.md      # first-timer walkthrough
 │   ├── IMPLEMENTATION_GUIDE.md # wiring this into a real, multi-environment project

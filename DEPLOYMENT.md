@@ -30,13 +30,18 @@ copilot plugin update mabdel130/agentex-copilot
 copilot plugin disable mabdel130/agentex-copilot   # or: uninstall
 ```
 
-You can also register it through a marketplace instead of a direct install, if your team runs
-one:
+This repo also self-hosts a marketplace ([`.github/plugin/marketplace.json`](./.github/plugin/marketplace.json))
+so you can install through the marketplace flow instead of a direct install, if you prefer it
+or your team standardizes on marketplaces generally:
 
 ```bash
 copilot plugin marketplace add mabdel130/agentex-copilot
 copilot plugin install agentex-copilot@agentex-copilot
 ```
+
+Both commands above install the exact same plugin — direct install and marketplace install are
+equivalent here, since the marketplace only lists this one plugin, sourced from `.` (this repo's
+own root).
 
 ## Fallback path: no Copilot CLI (VS Code Copilot Chat only)
 

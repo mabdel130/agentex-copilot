@@ -2,6 +2,15 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.3.0] — 2026-08-26
+
+### Added
+- `.github/plugin/marketplace.json` — a self-hosted Copilot CLI marketplace listing this one
+  plugin (`source: "."`), so it can be installed either directly
+  (`copilot plugin install mabdel130/agentex-copilot`) or via the marketplace flow
+  (`copilot plugin marketplace add mabdel130/agentex-copilot` then
+  `copilot plugin install agentex-copilot@agentex-copilot`) — both resolve to the same plugin.
+
 ## [2.2.0] — 2026-08-26
 
 ### Fixed
