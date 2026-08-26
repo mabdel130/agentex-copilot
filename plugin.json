@@ -23,6 +23,5 @@
     "database",
     "sql-server"
   ],
-  "agents": "agents/",
-  "skills": ["skills/"]
+  "agents": "agents/"
 }

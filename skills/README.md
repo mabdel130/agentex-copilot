@@ -1,7 +1,10 @@
 # Skills — QA Capability Reference
 
 This plugin's two agents (`test-orchestrator`, `qa-executor` — see
-[`../agents/`](../agents/)) implement the core browser-testing loop directly. The table below
+[`../agents/`](../agents/)) implement the core browser-testing loop directly; `plugin.json`
+does not yet declare a `skills` path, because this folder holds only reference documentation,
+not runnable `SKILL.md` files — see "Adding a skill to this port" below for what that requires.
+The table below
 documents all 12 QA capabilities from the upstream [AgenTeX](https://github.com/MhmdElGazzar/agentex)
 v0.19.0 Claude Code plugin that this loop is ported from — which ones are active in this
 version of the Copilot port, and which are documented here as the roadmap for full parity.
