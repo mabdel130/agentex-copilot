@@ -3,22 +3,22 @@
 New to GitHub Copilot agent mode itself? Get comfortable typing a request and approving an
 action in your editor's Copilot chat before continuing — this page assumes that part.
 
-There's no plugin installer here — see [DEPLOYMENT.md](../DEPLOYMENT.md) for why and the full
-walkthrough. The short version:
+## 1. Install the plugin
 
-## 1. Vendor the agent files into your project
+**Have the Copilot CLI?**
 
 ```bash
-mkdir -p .github/agentex
-cp -r /path/to/agentex-copilot/agents      .github/agentex/agents
-cp -r /path/to/agentex-copilot/docs/ai     .github/agentex/ai-docs
-cp    /path/to/agentex-copilot/AGENTS.md   ./AGENTS.md
+copilot plugin install mabdel130/agentex-copilot
 ```
 
-Then add `.github/copilot-instructions.md` pointing at them — see
-[DEPLOYMENT.md, step 2](../DEPLOYMENT.md#2-add-repo-wide-copilot-chat-instructions) for the
-exact content. This is what makes GitHub Copilot Chat actually read this behavior automatically,
-on every request, in this repo.
+**Don't have it (VS Code Copilot Chat only)?** Run this from the project you want to test
+instead:
+
+```bash
+npx github:mabdel130/agentex-copilot --target .
+```
+
+Full detail on both paths, and why two paths exist: [DEPLOYMENT.md](../DEPLOYMENT.md).
 
 ## 2. Install the browser driver
 
@@ -31,13 +31,13 @@ npx playwright install chromium
 
 ## 3. Scaffold the project
 
-Copy the configuration templates into your project:
+If you used the fallback installer in step 1, this is already done. Otherwise:
 
 ```bash
 mkdir -p config/environments
-cp /path/to/agentex-copilot/config/project.json.example config/project.json
-cp /path/to/agentex-copilot/config/environments/dev.json.example config/environments/dev.json
-cp /path/to/agentex-copilot/.env.example .env
+cp config/project.json.example config/project.json
+cp config/environments/dev.json.example config/environments/dev.json
+cp .env.example .env
 ```
 
 This gives you a starting `config/project.json`, a sample `config/environments/dev.json`, and a
@@ -48,18 +48,15 @@ structure works — group stateful scenarios into the same file).
 
 Grant Copilot agent mode terminal access for Playwright (and `curl`/`sqlcmd` if you use
 `api:`/`db:` steps), and deny reads of `.env`. See
-[DEPLOYMENT.md, step 5](../DEPLOYMENT.md#5-grant-tool-permissions).
+[DEPLOYMENT.md, "Grant tool permissions"](../DEPLOYMENT.md#grant-tool-permissions).
 
 ## 5. Run your first test
-
-Open the project in an editor with Copilot Chat in **agent mode**, and ask:
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-Here's what happens: Copilot reads `.github/copilot-instructions.md`, follows it to `AGENTS.md`,
-then to `test-orchestrator.agent.md`. The orchestrator restates what it's about to test and
+Here's what happens: the `test-orchestrator` agent restates what it's about to test and
 proposes a numbered list of scenarios — this is a checkpoint, nothing runs yet until you
 approve. Once you do, it opens a real browser and works through each scenario one at a time,
 pausing after each one so you can see the result before it continues. When it's done,
@@ -74,10 +71,10 @@ executions/execu_<timestamp>/
 
 ## Quick reference
 
-- Vendor the files: see [DEPLOYMENT.md](../DEPLOYMENT.md)
+- Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
 - Browser driver: `npm install -D @playwright/test && npx playwright install chromium`
 - Scaffold: copy `config/*.example` files (see step 3 above)
-- Run: describe what to test, in plain language, in Copilot Chat agent mode
+- Run: describe what to test, in plain language
 
 ## Next steps
 

@@ -1,7 +1,6 @@
 ---
 name: test-orchestrator
 description: Plans and orchestrates a QA test run against a web application — resolves the target environment, plans scenarios, chooses sequential or parallel mode, dispatches qa-executor agents, and merges results into a final report and HTML dashboard. This is the agent the user talks to when they ask to test something.
-tools: ["bash", "read", "write", "glob", "browser"]
 ---
 
 # Test Orchestrator

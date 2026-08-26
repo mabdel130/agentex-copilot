@@ -3,11 +3,29 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Works with GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-agent%20mode-8957e5.svg?logo=githubcopilot&logoColor=white)](https://github.com/features/copilot)
+[![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
 [![Ported from AgenTeX](https://img.shields.io/badge/ported%20from-AgenTeX%20v0.19.0-8A2BE2.svg)](https://github.com/MhmdElGazzar/agentex)
+
+---
+
+## Install
+
+```bash
+copilot plugin install mabdel130/agentex-copilot
+```
+
+That's it — this is a real [GitHub Copilot CLI plugin](https://docs.github.com/en/copilot/concepts/agents/about-plugins):
+a `plugin.json` manifest plus `agents/*.agent.md` role definitions, installed the same way you'd
+install any other Copilot CLI plugin. No Copilot CLI yet? See
+[**No Copilot CLI? Use the fallback installer**](#no-copilot-cli-use-the-fallback-installer) below.
+
+> Earlier versions of this README claimed GitHub Copilot had no real plugin system at all and
+> told people to hand-copy files into their repo instead. That was wrong — full story, and why
+> it happened, in [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v220).
+> The install command above is the real, current, correct one.
 
 ---
 
@@ -25,13 +43,6 @@ and an agent:
 
 This repo is a GitHub Copilot–oriented port of [**AgenTeX**](https://github.com/MhmdElGazzar/agentex)
 v0.19.0, originally a Claude Code plugin by Mohamed Elgazzar.
-
-> **Read this before you install anything:** GitHub Copilot has no plugin marketplace and no
-> `copilot plugin install` command — this repo used to imply otherwise, and that was wrong (full
-> story in [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v210)). What
-> actually works, and what the instructions below use, is **vendoring**: you copy a handful of
-> instruction files into your own project, and GitHub Copilot's real, documented mechanisms
-> (`AGENTS.md`, `.github/copilot-instructions.md`) pick them up automatically.
 
 ---
 
@@ -51,36 +62,47 @@ tester have caught this" layer that's expensive to script conventionally.
 
 ---
 
-## 5-minute quick start
+## Quick start
 
 ```bash
-# 1. Vendor the agent files into the project you want to test
-mkdir -p .github/agentex
-cp -r /path/to/agentex-copilot/agents      .github/agentex/agents
-cp -r /path/to/agentex-copilot/docs/ai     .github/agentex/ai-docs
-cp    /path/to/agentex-copilot/AGENTS.md   ./AGENTS.md
+# 1. Install the plugin (once, per developer machine)
+copilot plugin install mabdel130/agentex-copilot
 
-# 2. Point Copilot Chat at them (create this file — see DEPLOYMENT.md for exact contents)
-#    .github/copilot-instructions.md
-
-# 3. Install the browser driver
+# 2. In the project you want to test, install the browser driver
 npm install -D @playwright/test && npx playwright install chromium
 
-# 4. Scaffold config
+# 3. Scaffold config (copy from this plugin's templates, or write your own)
 mkdir -p config/environments
-cp /path/to/agentex-copilot/config/project.json.example              config/project.json
-cp /path/to/agentex-copilot/config/environments/dev.json.example     config/environments/dev.json
-cp /path/to/agentex-copilot/.env.example                              .env
+cp <plugin install path>/config/project.json.example              config/project.json
+cp <plugin install path>/config/environments/dev.json.example     config/environments/dev.json
+cp <plugin install path>/.env.example                              .env
 ```
 
-Then, in an editor with **GitHub Copilot Chat in agent mode**, just ask:
+Then, from that project, ask Copilot (CLI or Chat):
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-Full walkthrough, including *why* it's set up this way: **[DEPLOYMENT.md](./DEPLOYMENT.md)**.
-Guided version for first-timers: **[docs/getting-started.md](./docs/getting-started.md)**.
+Full walkthrough: **[DEPLOYMENT.md](./DEPLOYMENT.md)**. Guided version for first-timers:
+**[docs/getting-started.md](./docs/getting-started.md)**.
+
+---
+
+## No Copilot CLI? Use the fallback installer
+
+If you're on VS Code Copilot Chat without the standalone `copilot` CLI, there's no plugin
+system to install into — but the same agent files still work as plain repo instructions.
+Run this from the project you want to test:
+
+```bash
+npx github:mabdel130/agentex-copilot --target .
+```
+
+This copies `agents/` and `docs/ai/` into `.github/agentex/`, writes `AGENTS.md` and
+`.github/copilot-instructions.md` so Copilot Chat picks them up automatically, and scaffolds
+`config/`. It's idempotent — safe to re-run, never overwrites a file you've already edited.
+See [`scripts/install.js`](./scripts/install.js) for exactly what it does.
 
 ---
 
@@ -112,13 +134,16 @@ A real defect entry looks like this (from this repo's own `example.com` smoke te
 
 ## How it works under the hood
 
-Two roles, defined as plain markdown agent files — no proprietary format, just frontmatter +
-instructions any capable coding agent can follow:
+Two roles, defined as plain markdown agent files:
 
 | Agent | File | Job |
 |---|---|---|
 | **`test-orchestrator`** | [`agents/test-orchestrator.agent.md`](./agents/test-orchestrator.agent.md) | The one you talk to. Resolves the target environment, plans scenarios, picks sequential vs. parallel mode, dispatches executors, merges the final report. |
 | **`qa-executor`** | [`agents/qa-executor.agent.md`](./agents/qa-executor.agent.md) | Runs exactly one test spec to completion in its own isolated browser session. Dispatched by the orchestrator, never invoked directly. |
+
+Neither file restricts its `tools:` frontmatter — per GitHub's own docs, omitting that field
+gives an agent access to everything (shell, file read/write, search), which is exactly what
+browser-driven testing needs.
 
 **Sequential mode** (the default) — human-in-the-loop, pauses after each scenario for your
 review. Best for exploratory testing and new features.
@@ -147,8 +172,10 @@ Full policy: [`docs/ai/security-policy.md`](./docs/ai/security-policy.md) ·
 
 ```
 agentex-copilot/
-├── AGENTS.md                   # entrypoint instructions — vendor this into your project
+├── plugin.json                 # real Copilot CLI plugin manifest
 ├── agents/                     # test-orchestrator + qa-executor role definitions
+├── scripts/install.js          # fallback installer for non-CLI Copilot Chat users
+├── templates/                  # AGENTS.md / copilot-instructions.md used by the fallback installer
 ├── docs/
 │   ├── getting-started.md      # first-timer walkthrough
 │   ├── IMPLEMENTATION_GUIDE.md # wiring this into a real, multi-environment project
@@ -156,8 +183,7 @@ agentex-copilot/
 │   └── ai/                     # context, architecture, security-policy, testing-policy
 ├── config/                     # project.json.example, environments/dev.json.example
 ├── skills/                     # capability reference — what's ported vs. documented-only
-├── DEPLOYMENT.md               # the real install instructions (read this first)
-└── plugin.json                 # descriptive metadata only — Copilot does not read this file
+└── DEPLOYMENT.md               # full install + config walkthrough
 ```
 
 ## Configuration model
@@ -177,7 +203,8 @@ This is a documentation-and-agent-definition port, not a full 1:1 reimplementati
 documented-only) and [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md) for the
 complete gap list — in short: no bundled runner scripts yet (`run_api.js`, `run_db.js`,
 HTML report generation), no `ui-check`/`define-flow` implementation yet, no Azure DevOps
-integration in this port.
+integration in this port, and no `skills/*/SKILL.md` files yet (the `skills/` folder is
+reference documentation only — `plugin.json` doesn't declare a `skills` path until that changes).
 
 ## Security
 

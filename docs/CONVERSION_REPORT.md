@@ -121,9 +121,53 @@ self-documenting convention (they cost nothing and make each file's purpose and 
 clear to a human or an agent reading it directly) — just understand that nothing auto-parses
 them the way `copilot-plugin-converter`'s docs implied.
 
+## Correction (v2.2.0)
+
+The v2.1.0 correction above over-corrected. It's true that
+`https://json.schemastore.org/copilot-plugin.json` 404s and that `copilot-plugin-converter`
+models a schema that isn't official — but the conclusion drawn from that ("Copilot has no
+plugin system at all") was wrong. **GitHub Copilot CLI plugins are real**, officially documented,
+and structurally very close to what v2.0.0 originally built. Sources, checked directly rather
+than taken on faith this time:
+
+- [docs.github.com/en/copilot/concepts/agents/about-plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins) — plugin concept, components (agents, skills, hooks, MCP/LSP configs), install methods.
+- [docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference) — the actual `plugin.json` schema: only `name` is required; `agents`/`skills` default to `agents/`/`skills/` if omitted; manifest may live at `plugin.json`, `.plugin/plugin.json`, `.github/plugin/plugin.json`, or `.claude-plugin/plugin.json`.
+- [github.com/github/copilot-plugins](https://github.com/github/copilot-plugins) — GitHub's own official plugin examples repo (notably, it ships a `.claude-plugin/` directory itself — the two ecosystems can share a manifest location).
+- Real install commands confirmed from official docs and a third-party technical writeup: `copilot plugin install OWNER/REPO`, `copilot plugin marketplace add OWNER/REPO`, `copilot plugin install NAME@MARKETPLACE`.
+
+What was genuinely wrong in v2.0.0, and is fixed now:
+
+- The `$schema` URL was invented/guessed (schemastore's real copy 404s) — removed rather than
+  replaced with another guess, since `$schema` is optional and only relevant for the separate
+  "Open Plugin Spec" opt-in mode this plugin doesn't use.
+- `displayName` is not a field in the real schema — removed.
+- `author.email` was never required in the real schema (it's `name` that's required, at the
+  `author` object level `name` is required, not `email`) — kept anyway since we have one, but no
+  longer described as "required."
+- The agent frontmatter `tools:` array used values (`bash`, `read`, `write`, `glob`, `browser`)
+  that don't match any of the tool-name variants seen across GitHub's own docs and examples
+  (`bash`/`view`/`rg`/`glob` in one official example, `read`/`edit`/`search` in another). Rather
+  than guess a third combination, the field is **omitted entirely** — GitHub's docs state
+  explicitly that omitting `tools:` grants access to all available tools, which is what these
+  agents need anyway (shell for Playwright, file read/write for evidence).
+- `skills: ["skills/"]` is still not declared, but now for the original, still-valid reason from
+  v2.1.0: this repo doesn't ship any `skills/*/SKILL.md` files yet, only `skills/README.md`
+  reference documentation.
+
+As of v2.2.0: [`README.md`](../README.md) and [`DEPLOYMENT.md`](../DEPLOYMENT.md) lead with the
+real, primary install path (`copilot plugin install mabdel130/agentex-copilot`) and keep the
+v2.1.0 vendoring approach as a documented **fallback** for Copilot Chat users without the CLI —
+that mechanism (`AGENTS.md` + `.github/copilot-instructions.md`) is still real and still useful,
+just not the primary path anymore. [`scripts/install.js`](../scripts/install.js) implements that
+fallback as a one-command, idempotent installer (`npx github:mabdel130/agentex-copilot`).
+
 ## Versioning note
 
 This repository started at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
-`2.1.0` corrects the install-mechanism claim described above without changing agent behavior.
-Future releases should track new capabilities against the gaps listed earlier, and re-run the
-mapping whenever the upstream `agentex` plugin.json version changes.
+`2.1.0` incorrectly concluded no real Copilot plugin system exists and pivoted entirely to
+vendoring; `2.2.0` corrects that — the plugin system is real, `plugin.json` + `agents/` is the
+primary install path again, and vendoring is kept as a documented fallback. Agent *behavior* in
+`agents/*.agent.md` has not changed across any of these corrections — only how they're
+installed and how that installation method is described. Future releases should track new
+capabilities against the gaps listed earlier, and re-run the mapping whenever the upstream
+`agentex` plugin.json version changes.

@@ -2,6 +2,36 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.2.0] — 2026-08-26
+
+### Fixed
+- **v2.1.0 over-corrected.** GitHub Copilot CLI plugins are real, officially documented at
+  [docs.github.com/en/copilot/concepts/agents/about-plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins),
+  with a real `copilot plugin install OWNER/REPO` command. v2.1.0 concluded no such system
+  existed and pivoted entirely to a manual vendoring workflow — that conclusion was wrong. See
+  [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v220) for full sourcing.
+- `plugin.json` restored as a real, working manifest: dropped the invented `$schema` URL and
+  the non-existent `displayName` field, kept only fields confirmed in GitHub's actual CLI
+  plugin reference (`name`, `description`, `version`, `author`, `license`, `keywords`,
+  `homepage`, `repository`, `agents`).
+- `agents/*.agent.md` frontmatter no longer specifies a `tools:` array — the exact tool-name
+  strings are inconsistent across GitHub's own docs and examples, and omitting the field is
+  documented to grant access to all available tools, which is what these agents need.
+- README.md and DEPLOYMENT.md now lead with `copilot plugin install mabdel130/agentex-copilot`
+  as the primary install path.
+
+### Added
+- `scripts/install.js` + `templates/AGENTS.md` + `templates/copilot-instructions.md` — a
+  dependency-free, idempotent fallback installer for Copilot Chat users without the CLI
+  (`npx github:mabdel130/agentex-copilot --target .`), implementing the vendoring approach from
+  v2.1.0 as an actual one-command tool instead of a manual walkthrough.
+- `package.json` — gives the repo a `bin` entry so `npx github:mabdel130/agentex-copilot` works.
+
+### Unchanged
+- Agent *behavior* in `agents/test-orchestrator.agent.md` and `agents/qa-executor.agent.md` —
+  only the install mechanism and its documentation changed, across both this and the v2.1.0
+  correction.
+
 ## [2.1.0] — 2026-08-26
 
 ### Fixed

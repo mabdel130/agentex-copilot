@@ -1,10 +1,11 @@
 # AGENTS.md
 
 Instructions for GitHub Copilot (and any other AGENTS.md-aware coding agent) working in a
-project that has AgenTeX vendored in (see [DEPLOYMENT.md](./DEPLOYMENT.md) — there's no plugin
-installer, this file and `agents/` are meant to be copied into your project directly). This
-file is the entrypoint Copilot reads before acting — it explains what AgenTeX is, which agents
-it ships, and the rules that apply to every run.
+project that has AgenTeX installed — either as a real Copilot CLI plugin
+(`copilot plugin install mabdel130/agentex-copilot`) or vendored in via the fallback installer
+for non-CLI Copilot Chat use (see [DEPLOYMENT.md](./DEPLOYMENT.md)). This file is the entrypoint
+Copilot reads before acting — it explains what AgenTeX is, which agents it ships, and the rules
+that apply to every run.
 
 ## What this plugin does
 

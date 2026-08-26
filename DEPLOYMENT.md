@@ -1,59 +1,74 @@
 # Deployment
 
-How to actually get AgenTeX's behavior running against a real project with **real GitHub
-Copilot**. There is no `copilot plugin install` command and no plugin marketplace — Copilot
-doesn't have a plugin-manifest system. What it *does* support, and what this guide uses, is:
+How to install and configure AgenTeX for real GitHub Copilot use.
 
-| Mechanism | Read by | Purpose |
-|---|---|---|
-| `AGENTS.md` at your repo root (or nearest ancestor) | Copilot's coding agent (and Claude Code, Codex, etc.) | Entrypoint instructions an agent reads before acting |
-| `.github/copilot-instructions.md` | GitHub Copilot Chat, every request in that repo | Always-applied repo-wide custom instructions |
-| `.github/instructions/*.instructions.md` (optional) | Copilot Chat, scoped by `applyTo` glob | Path-specific instructions |
+> If you're coming from an earlier version of this doc: it used to claim Copilot had no plugin
+> system at all. That was wrong. GitHub Copilot CLI plugins are real and documented at
+> [docs.github.com/en/copilot/concepts/agents/about-plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins).
+> See [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v220) for the full
+> story of what was wrong and why.
 
-"Installing" this plugin means **vendoring** `AGENTS.md`, `agents/`, and `docs/ai/` into the
-project you want tested, and pointing `.github/copilot-instructions.md` at them. This is the
-same approach validated end-to-end in this repo's own `demo-project/` (see
-[`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v210) for why).
+## Primary path: install via the Copilot CLI
 
-## 1. Copy the agent files into your project
-
-From a clone of this repo, into the root of the project you want to test:
+If you have the [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/overview)
+(`copilot` on your PATH), this repo is a real plugin — install it directly from GitHub:
 
 ```bash
-# from your target project's root
-mkdir -p .github/agentex
-cp -r /path/to/agentex-copilot/agents          .github/agentex/agents
-cp -r /path/to/agentex-copilot/docs/ai         .github/agentex/ai-docs
-cp    /path/to/agentex-copilot/AGENTS.md       ./AGENTS.md
+copilot plugin install mabdel130/agentex-copilot
 ```
 
-If your project already has its own `AGENTS.md`, merge the two rather than overwriting — keep
-your project-specific instructions and append a pointer into `.github/agentex/agents/`.
+This installs `plugin.json` and `agents/*.agent.md` into your per-user Copilot plugin store
+(`~/.copilot/installed-plugins/`), making the `test-orchestrator` and `qa-executor` agents
+available to Copilot CLI across your projects. No per-project setup step required for the
+agents themselves.
 
-## 2. Add repo-wide Copilot Chat instructions
+Manage it with the usual commands:
 
-Create `.github/copilot-instructions.md` in your project:
-
-```markdown
-# Repository custom instructions for GitHub Copilot
-
-This project has AgenTeX QA-testing behavior installed. Before responding to any request to
-test, check, verify, or find defects in this application's behavior:
-
-1. Read `AGENTS.md` at the repository root.
-2. Read `.github/agentex/agents/test-orchestrator.agent.md` for how to plan and run the test.
-3. Read `.github/agentex/ai-docs/security-policy.md` and `testing-policy.md` before judging
-   PASS/FAIL or touching any secret/config value.
-
-Never modify application source code as part of a testing request — only write test artifacts
-under `executions/`. Never use real personal data or complete a real signup/login/checkout.
+```bash
+copilot plugin list
+copilot plugin update mabdel130/agentex-copilot
+copilot plugin disable mabdel130/agentex-copilot   # or: uninstall
 ```
 
-This file is read automatically for **every** Copilot Chat request in the repo, not just when
-you happen to mention testing — that's what makes it reliable rather than something you have
-to remember to paste in each time.
+You can also register it through a marketplace instead of a direct install, if your team runs
+one:
 
-## 3. Install the browser driver
+```bash
+copilot plugin marketplace add mabdel130/agentex-copilot
+copilot plugin install agentex-copilot@agentex-copilot
+```
+
+## Fallback path: no Copilot CLI (VS Code Copilot Chat only)
+
+If you're only using Copilot Chat inside an editor, without the standalone CLI, there's no
+plugin-install mechanism to hook into — Copilot Chat instead reads two real, documented files
+directly from your repo: `AGENTS.md` (agent instructions) and `.github/copilot-instructions.md`
+(repo-wide custom instructions, applied on every request). The fallback installer vendors this
+plugin's files into that shape:
+
+```bash
+# from the root of the project you want to test
+npx github:mabdel130/agentex-copilot --target .
+```
+
+This is idempotent (safe to re-run, never overwrites a file you've already edited) and creates:
+
+```
+your-project/
+├── AGENTS.md                             # entrypoint Copilot's coding agent reads
+├── .github/
+│   ├── copilot-instructions.md           # read by Copilot Chat on every request
+│   └── agentex/
+│       ├── agents/                       # test-orchestrator.agent.md, qa-executor.agent.md
+│       └── ai-docs/                      # security-policy.md, testing-policy.md, architecture.md
+├── config/project.json
+└── config/environments/dev.json
+```
+
+See [`scripts/install.js`](./scripts/install.js) for exactly what it does — it's a plain,
+dependency-free Node script, nothing hidden.
+
+## Either path: install the browser driver
 
 In the project you want to test:
 
@@ -62,15 +77,18 @@ npm install -D @playwright/test
 npx playwright install chromium
 ```
 
-## 4. Scaffold configuration
+## Either path: scaffold configuration
 
-Copy the templates and fill them in:
+If you used the CLI install, copy the templates from wherever `copilot plugin list` says the
+plugin was installed to (or just grab them from
+[github.com/mabdel130/agentex-copilot/config](https://github.com/mabdel130/agentex-copilot/tree/main/config)).
+If you used the fallback installer, this already happened for you. Either way, fill in:
 
 ```bash
-mkdir -p config/environments
-cp /path/to/agentex-copilot/config/project.json.example              config/project.json
-cp /path/to/agentex-copilot/config/environments/dev.json.example     config/environments/dev.json
-cp /path/to/agentex-copilot/.env.example                             .env
+mkdir -p config/environments   # if not already scaffolded
+cp config/project.json.example config/project.json                       # if needed
+cp config/environments/dev.json.example config/environments/dev.json     # if needed
+cp .env.example .env
 ```
 
 Edit:
@@ -78,29 +96,25 @@ Edit:
 - `config/environments/dev.json` — target `portalUrl`, test `users`, `db`/`api` blocks.
 - `.env` — the actual secret values referenced by `{ "envSecret": "NAME" }` in the JSON files.
 
-`.env` is gitignored by default (copy this repo's [`.gitignore`](./.gitignore) entries too if
-your project doesn't already exclude `.env`) — never commit it.
+`.env` is gitignored by default — never commit it.
 
-## 5. Grant tool permissions
+## Grant tool permissions
 
 Copilot agent mode needs permission to run a terminal (for Playwright / `sqlcmd` / `curl`) and
-read/write files under `executions/`. Configure this per your Copilot agent-mode/tool-approval
-settings — allow Playwright commands outright, and deny reads of `.env` and any destructive
-terminal commands.
+read/write files under `executions/`. Both agent files here deliberately omit a `tools:`
+restriction in frontmatter — per GitHub's docs, that means "all available tools," which is what
+browser-driven testing needs. Configure your Copilot tool-approval settings to allow Playwright
+commands outright, and deny reads of `.env` and any destructive terminal commands.
 
-## 6. Run your first test
+## Run your first test
 
-Open the project in an editor with GitHub Copilot Chat in **agent mode** (e.g. VS Code) and ask,
-in plain language:
+Ask Copilot (CLI or Chat), in plain language:
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-Copilot picks up `.github/copilot-instructions.md` automatically, follows it to `AGENTS.md`,
-then to `.github/agentex/agents/test-orchestrator.agent.md` for how to plan and run the test.
-
-## 7. Review results
+## Review results
 
 Every run writes to `executions/execu_<timestamp>/`:
 
@@ -113,16 +127,17 @@ executions/execu_<timestamp>/
 
 ## CI/CD (optional)
 
-To run AgenTeX unattended (e.g. nightly regression), invoke Copilot's coding agent from a CI
-job against a headless browser target, in **parallel mode**, pointing at your `test/` spec
-directory. Treat a non-zero defect count as a build signal, not a hard failure, unless your
-team decides otherwise — AgenTeX reports defects, it does not gate merges by default.
+To run AgenTeX unattended (e.g. nightly regression), invoke Copilot from a CI job against a
+headless browser target, in **parallel mode**, pointing at your `test/` spec directory. Treat a
+non-zero defect count as a build signal, not a hard failure, unless your team decides
+otherwise — AgenTeX reports defects, it does not gate merges by default.
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Copilot doesn't seem to know about AgenTeX at all | `.github/copilot-instructions.md` missing or not committed | Confirm the file exists at that exact path and is tracked by git — Copilot Chat reads it from the repo, not your local uncommitted scratch files. |
+| `copilot plugin install` fails to find the repo | Repo is private, or `copilot` isn't authenticated to GitHub | Confirm `copilot` is logged in and has access; `mabdel130/agentex-copilot` is public. |
+| Copilot Chat doesn't seem to know about AgenTeX (fallback path) | `.github/copilot-instructions.md` missing or not committed | Confirm the file exists at that exact path and is tracked by git. |
 | "environment has no file" | `defaultEnvironment` or requested env doesn't match a file in `config/environments/` | Create the matching `<env>.json` or fix the name — never falls back silently. |
 | Secrets appearing in logs | A step tried to print an `envSecret` value directly | This is a bug — file an issue; agents must resolve secrets only at point of use. |
 | Browser session collisions in parallel mode | Two sessions sharing the same session id | Each spec file must get its own session id from the orchestrator. |
