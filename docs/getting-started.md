@@ -3,11 +3,22 @@
 New to GitHub Copilot agent mode itself? Get comfortable typing a request and approving an
 action in your editor's Copilot chat before continuing — this page assumes that part.
 
-## 1. Add the plugin
+There's no plugin installer here — see [DEPLOYMENT.md](../DEPLOYMENT.md) for why and the full
+walkthrough. The short version:
 
-Add this repository to the project you want to test, following your Copilot plugin/extension
-installation flow (see [DEPLOYMENT.md](../DEPLOYMENT.md) for details). At minimum, Copilot
-needs to be able to read `AGENTS.md` and `agents/*.agent.md` from this repo.
+## 1. Vendor the agent files into your project
+
+```bash
+mkdir -p .github/agentex
+cp -r /path/to/agentex-copilot/agents      .github/agentex/agents
+cp -r /path/to/agentex-copilot/docs/ai     .github/agentex/ai-docs
+cp    /path/to/agentex-copilot/AGENTS.md   ./AGENTS.md
+```
+
+Then add `.github/copilot-instructions.md` pointing at them — see
+[DEPLOYMENT.md, step 2](../DEPLOYMENT.md#2-add-repo-wide-copilot-chat-instructions) for the
+exact content. This is what makes GitHub Copilot Chat actually read this behavior automatically,
+on every request, in this repo.
 
 ## 2. Install the browser driver
 
@@ -24,9 +35,9 @@ Copy the configuration templates into your project:
 
 ```bash
 mkdir -p config/environments
-cp config/project.json.example config/project.json
-cp config/environments/dev.json.example config/environments/dev.json
-cp .env.example .env
+cp /path/to/agentex-copilot/config/project.json.example config/project.json
+cp /path/to/agentex-copilot/config/environments/dev.json.example config/environments/dev.json
+cp /path/to/agentex-copilot/.env.example .env
 ```
 
 This gives you a starting `config/project.json`, a sample `config/environments/dev.json`, and a
@@ -35,16 +46,20 @@ structure works — group stateful scenarios into the same file).
 
 ## 4. Set permissions
 
-Grant Copilot agent mode terminal access for the Playwright CLI (and `curl`/`sqlcmd` if you use
-`api:`/`db:` steps), and deny reads of `.env`. See [DEPLOYMENT.md](../DEPLOYMENT.md#4-grant-tool-permissions).
+Grant Copilot agent mode terminal access for Playwright (and `curl`/`sqlcmd` if you use
+`api:`/`db:` steps), and deny reads of `.env`. See
+[DEPLOYMENT.md, step 5](../DEPLOYMENT.md#5-grant-tool-permissions).
 
 ## 5. Run your first test
+
+Open the project in an editor with Copilot Chat in **agent mode**, and ask:
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-Here's what happens: the `test-orchestrator` agent restates what it's about to test and
+Here's what happens: Copilot reads `.github/copilot-instructions.md`, follows it to `AGENTS.md`,
+then to `test-orchestrator.agent.md`. The orchestrator restates what it's about to test and
 proposes a numbered list of scenarios — this is a checkpoint, nothing runs yet until you
 approve. Once you do, it opens a real browser and works through each scenario one at a time,
 pausing after each one so you can see the result before it continues. When it's done,
@@ -53,18 +68,16 @@ everything lands in a new timestamped folder:
 ```
 executions/execu_<timestamp>/
 ├── report.md              # the final summary — what passed, what failed
-├── extent-report.html     # an interactive dashboard version, open it in any browser
 ├── bugs/bug-list.md       # a merged list of every defect found
 └── ...                    # screenshots and logs backing up every result
 ```
 
 ## Quick reference
 
-- Add the plugin: see [DEPLOYMENT.md](../DEPLOYMENT.md)
+- Vendor the files: see [DEPLOYMENT.md](../DEPLOYMENT.md)
 - Browser driver: `npm install -D @playwright/test && npx playwright install chromium`
 - Scaffold: copy `config/*.example` files (see step 3 above)
-- Run: describe what to test, in plain language, or invoke the `test-orchestrator` agent
-  directly if your Copilot setup supports agent selection
+- Run: describe what to test, in plain language, in Copilot Chat agent mode
 
 ## Next steps
 

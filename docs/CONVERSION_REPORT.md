@@ -83,8 +83,47 @@ Glob↔glob, Browser↔browser — all 1:1 compatible, no deprecated tools invol
   as of v0.19.0).
 - No Azure DevOps integration (estimation, test design, bug filing, generic Azure CLI access).
 
+## Correction (v2.1.0)
+
+Everything above this section describes the conversion as originally done in v2.0.0, following
+the schema at `https://json.schemastore.org/copilot-plugin.json` referenced by
+[copilot-plugin-converter](https://github.com/mabdel130/copilot-plugin-converter). When this
+plugin was actually wired up against real GitHub Copilot, that schema URL turned out to
+**404** — it does not exist. There is no `copilot plugin install` command, no plugin-manifest
+system, and no automatic discovery of a `agents/` or `skills/` directory in a real GitHub
+Copilot installation. `copilot-plugin-converter`'s format models a plugin system that isn't an
+actual, shipped GitHub Copilot capability.
+
+What **is** real and documented, confirmed against GitHub's own Copilot docs:
+
+| Mechanism | Status |
+|---|---|
+| `AGENTS.md` (nearest one in the directory tree) | Real — read by Copilot's coding agent |
+| `.github/copilot-instructions.md` | Real — read by Copilot Chat on every request in the repo |
+| `.github/instructions/*.instructions.md` (`applyTo` glob) | Real — path-scoped instructions |
+| `plugin.json`, `.agent.md` tools array, `skills/*/SKILL.md` input schema, `copilot plugin install` | **Not real** — no such GitHub Copilot feature exists |
+
+As of v2.1.0, this repository is repositioned accordingly:
+
+- `plugin.json` is kept only as descriptive metadata (name/version/description) — it carries an
+  explicit `_readme` note that Copilot does not read it, and no longer claims a `$schema` or
+  `agents`/`skills` manifest field.
+- [`DEPLOYMENT.md`](../DEPLOYMENT.md) and [`getting-started.md`](./getting-started.md) now
+  document the real integration path: **vendor** `AGENTS.md`, `agents/`, and `docs/ai/` directly
+  into the project you want tested, and add a `.github/copilot-instructions.md` pointing at
+  them. This was validated end-to-end against a real Playwright run before being written down
+  here — it is not theoretical.
+- `agents/*.agent.md` and `docs/ai/*.md` are unchanged in content — the *files* were already
+  fine; only the claim about how Copilot discovers them was wrong.
+
+The `.agent.md` extension and lowercase-array `tools:` frontmatter are kept as a readable,
+self-documenting convention (they cost nothing and make each file's purpose and required tools
+clear to a human or an agent reading it directly) — just understand that nothing auto-parses
+them the way `copilot-plugin-converter`'s docs implied.
+
 ## Versioning note
 
-This repository starts at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
-Future releases should track new capabilities against the gaps listed above, and re-run the
-mapping in this document whenever the upstream `agentex` plugin.json version changes.
+This repository started at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
+`2.1.0` corrects the install-mechanism claim described above without changing agent behavior.
+Future releases should track new capabilities against the gaps listed earlier, and re-run the
+mapping whenever the upstream `agentex` plugin.json version changes.

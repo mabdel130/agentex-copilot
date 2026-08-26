@@ -1,8 +1,9 @@
 # Implementation Guide
 
-Step-by-step instructions for wiring AgenTeX into a real project once the plugin files are in
-place. This is the "day 2" doc — [`getting-started.md`](./getting-started.md) gets you to a
-first run; this page covers doing it properly for a real codebase.
+Step-by-step instructions for wiring AgenTeX into a real project once `AGENTS.md` and
+`agents/` are vendored in (see [DEPLOYMENT.md](../DEPLOYMENT.md)). This is the "day 2" doc —
+[`getting-started.md`](./getting-started.md) gets you to a first run; this page covers doing
+it properly for a real codebase.
 
 ## 1. Decide your environments
 

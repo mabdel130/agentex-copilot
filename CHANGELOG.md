@@ -2,6 +2,29 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.1.0] — 2026-08-26
+
+### Fixed
+- **Corrected the install mechanism.** v2.0.0 modeled `plugin.json` on the schema referenced by
+  [copilot-plugin-converter](https://github.com/mabdel130/copilot-plugin-converter)
+  (`https://json.schemastore.org/copilot-plugin.json`), which turned out to 404 — there is no
+  such GitHub Copilot plugin-manifest system, and no `copilot plugin install` command. See
+  [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v210) for the full
+  writeup.
+- `plugin.json` no longer claims a `$schema`, `agents`, or `skills` manifest field it doesn't
+  actually have consumers for — kept only as descriptive metadata, with an explicit note that
+  Copilot doesn't read it.
+- [`DEPLOYMENT.md`](./DEPLOYMENT.md) and [`docs/getting-started.md`](./docs/getting-started.md)
+  rewritten around the integration path that's actually real and was validated end-to-end
+  against a live Playwright run: vendor `AGENTS.md` + `agents/` + `docs/ai/` into the target
+  project, and add `.github/copilot-instructions.md` so Copilot Chat picks it up on every
+  request.
+
+### Unchanged
+- Agent behavior in `agents/test-orchestrator.agent.md` and `agents/qa-executor.agent.md` is
+  unchanged — only the documentation of how Copilot discovers them was wrong, not the agents
+  themselves.
+
 ## [2.0.0] — 2026-08-26
 
 ### Added
