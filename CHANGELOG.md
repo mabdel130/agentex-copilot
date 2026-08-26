@@ -2,6 +2,26 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.4.0] — 2026-08-26
+
+### Added
+- `skills/init-test/` — a real Agent Skill mirroring upstream AgenTeX's `/init-test` Claude
+  Code command. Ask Copilot "Set up AgenTeX for this project" to scaffold
+  `config/project.json`, `config/environments/dev.json`, `.env`, and `test/` — idempotent,
+  never overwrites existing files. Built to the real [Agent Skills specification](https://agentskills.io/specification)
+  (the open standard GitHub Copilot implements), confirmed against GitHub's own example plugins
+  at [github/copilot-plugins](https://github.com/github/copilot-plugins).
+- `plugin.json` now declares `"skills": ["skills/"]`, since the folder ships a real skill.
+
+### Fixed
+- `skills/README.md`'s "Adding a skill" section previously claimed `SKILL.md` needs a
+  JSON-Schema `input` block, sourced from `copilot-plugin-converter` — the real spec has no
+  such field; skills are triggered by matching `description` against the user's request, not
+  invoked with typed parameters. Corrected with a link to the real spec and a working example.
+- Install docs (`README.md`, `DEPLOYMENT.md`, `docs/getting-started.md`) replaced the manual
+  "find the global install path and `cp` the example configs" step with asking Copilot to run
+  `init-test` directly — matching the polish of upstream's own `/init-test` command.
+
 ## [2.3.0] — 2026-08-26
 
 ### Added

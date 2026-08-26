@@ -161,13 +161,45 @@ that mechanism (`AGENTS.md` + `.github/copilot-instructions.md`) is still real a
 just not the primary path anymore. [`scripts/install.js`](../scripts/install.js) implements that
 fallback as a one-command, idempotent installer (`npx github:mabdel130/agentex-copilot`).
 
+## Self-hosted marketplace (v2.3.0)
+
+Added [`.github/plugin/marketplace.json`](../.github/plugin/marketplace.json), following the
+real marketplace format confirmed from the same official sources as the v2.2.0 correction
+(`name`, `owner{name,email}`, `metadata{description,version}`, `plugins[]` with each entry's
+own `name`/`description`/`version`/`source`). Lists this repo's one plugin, sourced from `.`
+(the repo root) — gives `copilot plugin marketplace add` + `install NAME@MARKETPLACE` as an
+equivalent alternative to the direct-install command, matching the marketplace-based install
+flow `mabdel130/agentex` uses on the Claude Code side.
+
+## Real init-test skill (v2.4.0)
+
+Closes the `skills: ["skills/"]` gap noted above by shipping one real skill,
+[`skills/init-test/`](../skills/init-test/), mirroring upstream AgenTeX's `/init-test` Claude
+Code command (there is no direct Copilot equivalent of a Claude "command," so this is
+implemented as an Agent Skill instead — triggered by matching intent, e.g. "set up AgenTeX
+here," rather than a typed slash command).
+
+Building it surfaced one more inherited inaccuracy: [`skills/README.md`](../skills/README.md)'s
+"Adding a skill" section, written in the v2.0.0 pass, claimed `SKILL.md` needs a JSON-Schema
+`input` block — sourced from `copilot-plugin-converter`, the same unofficial repo responsible
+for the v2.0.0/v2.1.0 back-and-forth. The real format is the
+[Agent Skills specification](https://agentskills.io/specification) — an open standard GitHub
+Copilot implements (linked from GitHub's own
+[about-agent-skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) page)
+— which has no `input` field at all: `name` (matching the directory name) and `description`
+(what it does *and* when to use it) are the only required frontmatter. Confirmed against
+GitHub's own shipped example at
+[github/copilot-plugins](https://github.com/github/copilot-plugins/blob/main/plugins/build-perf-cpp/skills/build-performance-analysis/SKILL.md),
+fetched and read directly rather than summarized secondhand.
+
 ## Versioning note
 
 This repository started at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
 `2.1.0` incorrectly concluded no real Copilot plugin system exists and pivoted entirely to
 vendoring; `2.2.0` corrects that — the plugin system is real, `plugin.json` + `agents/` is the
-primary install path again, and vendoring is kept as a documented fallback. Agent *behavior* in
-`agents/*.agent.md` has not changed across any of these corrections — only how they're
-installed and how that installation method is described. Future releases should track new
-capabilities against the gaps listed earlier, and re-run the mapping whenever the upstream
-`agentex` plugin.json version changes.
+primary install path again, and vendoring is kept as a documented fallback. `2.3.0` added a
+self-hosted marketplace; `2.4.0` added the first real skill and corrected the skill-format
+documentation. Agent *behavior* in `agents/*.agent.md` has not changed across any of these
+corrections — only how the plugin is installed, packaged, and described. Future releases should
+track new capabilities against the gaps listed earlier, and re-run the mapping whenever the
+upstream `agentex` plugin.json version changes.

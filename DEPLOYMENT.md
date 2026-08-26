@@ -17,10 +17,10 @@ If you have the [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/
 copilot plugin install mabdel130/agentex-copilot
 ```
 
-This installs `plugin.json` and `agents/*.agent.md` into your per-user Copilot plugin store
-(`~/.copilot/installed-plugins/`), making the `test-orchestrator` and `qa-executor` agents
-available to Copilot CLI across your projects. No per-project setup step required for the
-agents themselves.
+This installs `plugin.json`, `agents/*.agent.md`, and `skills/init-test/` into your per-user
+Copilot plugin store (`~/.copilot/installed-plugins/`), making the `test-orchestrator` and
+`qa-executor` agents — and the `init-test` scaffolding skill — available to Copilot CLI across
+your projects. No per-project setup step required for the agents themselves.
 
 Manage it with the usual commands:
 
@@ -84,19 +84,21 @@ npx playwright install chromium
 
 ## Either path: scaffold configuration
 
-If you used the CLI install, copy the templates from wherever `copilot plugin list` says the
-plugin was installed to (or just grab them from
-[github.com/mabdel130/agentex-copilot/config](https://github.com/mabdel130/agentex-copilot/tree/main/config)).
-If you used the fallback installer, this already happened for you. Either way, fill in:
+**CLI install** — from the project you want to test, ask Copilot to run the bundled
+[`init-test` skill](./skills/init-test/SKILL.md) (mirrors upstream AgenTeX's `/init-test`
+command):
 
-```bash
-mkdir -p config/environments   # if not already scaffolded
-cp config/project.json.example config/project.json                       # if needed
-cp config/environments/dev.json.example config/environments/dev.json     # if needed
-cp .env.example .env
+```
+Set up AgenTeX for this project.
 ```
 
-Edit:
+Copilot activates the `init-test` skill, which creates `config/project.json`,
+`config/environments/dev.json`, `.env`, and a `test/` folder — idempotent, never overwrites
+anything already there.
+
+**Fallback installer** — this already happened as part of `npx github:mabdel130/agentex-copilot`.
+
+Either way, fill in:
 - `config/project.json` — `defaultEnvironment`, KB settings, login mode.
 - `config/environments/dev.json` — target `portalUrl`, test `users`, `db`/`api` blocks.
 - `.env` — the actual secret values referenced by `{ "envSecret": "NAME" }` in the JSON files.

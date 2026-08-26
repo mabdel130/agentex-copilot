@@ -1,14 +1,23 @@
 # Skills — QA Capability Reference
 
 This plugin's two agents (`test-orchestrator`, `qa-executor` — see
-[`../agents/`](../agents/)) implement the core browser-testing loop directly; `plugin.json`
-does not yet declare a `skills` path, because this folder holds only reference documentation,
-not runnable `SKILL.md` files — see "Adding a skill to this port" below for what that requires.
-The table below
-documents all 12 QA capabilities from the upstream [AgenTeX](https://github.com/MhmdElGazzar/agentex)
-v0.19.0 Claude Code plugin that this loop is ported from — which ones are active in this
-version of the Copilot port, and which are documented here as the roadmap for full parity.
-See [`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md) for the conversion rationale.
+[`../agents/`](../agents/)) implement the core browser-testing loop directly. `plugin.json`
+declares `"skills": ["skills/"]`, and this folder currently ships one real skill
+([`init-test/`](./init-test/)) plus this reference documentation for everything else. The
+table below documents all 12 QA capabilities from the upstream
+[AgenTeX](https://github.com/MhmdElGazzar/agentex) v0.19.0 Claude Code plugin that the core
+loop is ported from — which ones are active in this version of the Copilot port, and which are
+documented here as the roadmap for full parity. See
+[`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md) for the conversion rationale.
+
+## Utility skills (Copilot-specific)
+
+Not one of the 12 QA capabilities below — this mirrors upstream's `/init-test` **command**
+(a Claude Code convention with no direct Copilot equivalent), rebuilt as a real Agent Skill.
+
+| Skill | Status | What it does |
+|---|---|---|
+| **[init-test](./init-test/SKILL.md)** | ✅ Ported | Scaffolds `config/project.json`, `config/environments/dev.json`, `.env`, and `test/` in the project you want to test — idempotent, never overwrites. Ask Copilot to "set up AgenTeX here" or similar. |
 
 ## Status legend
 
@@ -40,9 +49,14 @@ To bring a "Documented" capability to "Ported" status:
 1. Read the equivalent `SKILL.md` in the upstream
    [agentex `skills/` folder](https://github.com/MhmdElGazzar/agentex/tree/main/skills) for the
    full behavioral contract (catalog rules, safety rules, evidence format).
-2. Create `skills/<name>/SKILL.md` in this repo following the Copilot skill schema — frontmatter
-   needs `name`, a required `description`, and a JSON-Schema `input` block (see
-   [copilot-plugin-converter's schema reference](https://github.com/mabdel130/copilot-plugin-converter/blob/main/docs/schema-reference.md#skill-file-format)).
+2. Create `skills/<name>/SKILL.md` in this repo following the real
+   [Agent Skills specification](https://agentskills.io/specification) (the open standard GitHub
+   Copilot actually implements) — frontmatter needs `name` (must match the directory name,
+   lowercase-hyphenated) and a required `description` that states both what the skill does and
+   when to use it. There is no `input` schema field — skills are triggered by the agent matching
+   the user's request against `description`, not invoked with typed parameters. See
+   [`init-test/SKILL.md`](./init-test/SKILL.md) in this repo for a working example, or
+   [github/copilot-plugins](https://github.com/github/copilot-plugins) for GitHub's own.
 3. Port any deterministic runner script (`run_api.js`, `run_db.js`, …) into `skills/<name>/scripts/`,
    keeping the same safety enforcement (catalog-only lookups, DDL bans, param sanitization) —
    see [`../docs/ai/security-policy.md`](../docs/ai/security-policy.md) for what must hold.

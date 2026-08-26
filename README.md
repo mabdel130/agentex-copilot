@@ -3,7 +3,7 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.4.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -79,15 +79,16 @@ copilot plugin install mabdel130/agentex-copilot
 
 # 2. In the project you want to test, install the browser driver
 npm install -D @playwright/test && npx playwright install chromium
-
-# 3. Scaffold config (copy from this plugin's templates, or write your own)
-mkdir -p config/environments
-cp <plugin install path>/config/project.json.example              config/project.json
-cp <plugin install path>/config/environments/dev.json.example     config/environments/dev.json
-cp <plugin install path>/.env.example                              .env
 ```
 
-Then, from that project, ask Copilot (CLI or Chat):
+Then, from that project, ask Copilot to scaffold config (this runs the bundled `init-test`
+skill — mirrors upstream AgenTeX's `/init-test` command):
+
+```
+Set up AgenTeX for this project.
+```
+
+Then ask Copilot (CLI or Chat) for a test:
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
@@ -192,7 +193,9 @@ agentex-copilot/
 │   ├── CONVERSION_REPORT.md    # what changed porting from the Claude Code original
 │   └── ai/                     # context, architecture, security-policy, testing-policy
 ├── config/                     # project.json.example, environments/dev.json.example
-├── skills/                     # capability reference — what's ported vs. documented-only
+├── skills/
+│   ├── init-test/              # real skill: scaffolds config/ + test/ in your project
+│   └── README.md                # capability reference — what's ported vs. documented-only
 └── DEPLOYMENT.md               # full install + config walkthrough
 ```
 
@@ -211,10 +214,10 @@ Three homes, one job each:
 This is a documentation-and-agent-definition port, not a full 1:1 reimplementation. See
 [`skills/README.md`](./skills/README.md) for the full capability matrix (ported vs.
 documented-only) and [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md) for the
-complete gap list — in short: no bundled runner scripts yet (`run_api.js`, `run_db.js`,
-HTML report generation), no `ui-check`/`define-flow` implementation yet, no Azure DevOps
-integration in this port, and no `skills/*/SKILL.md` files yet (the `skills/` folder is
-reference documentation only — `plugin.json` doesn't declare a `skills` path until that changes).
+complete gap list — in short: `init-test` is the only real `SKILL.md` shipped so far; no
+bundled runner scripts yet for the QA capabilities themselves (`run_api.js`, `run_db.js`, HTML
+report generation), no `ui-check`/`define-flow` implementation yet, and no Azure DevOps
+integration in this port.
 
 ## Security
 

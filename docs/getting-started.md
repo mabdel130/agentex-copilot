@@ -31,18 +31,18 @@ npx playwright install chromium
 
 ## 3. Scaffold the project
 
-If you used the fallback installer in step 1, this is already done. Otherwise:
+If you used the fallback installer in step 1, this is already done. If you used the CLI
+install, just ask Copilot:
 
-```bash
-mkdir -p config/environments
-cp config/project.json.example config/project.json
-cp config/environments/dev.json.example config/environments/dev.json
-cp .env.example .env
+```
+Set up AgenTeX for this project.
 ```
 
-This gives you a starting `config/project.json`, a sample `config/environments/dev.json`, and a
-secrets-only `.env` ready for you to fill in. Add your own test specs under `test/` (any
-structure works — group stateful scenarios into the same file).
+This activates the bundled `init-test` skill ([`skills/init-test/SKILL.md`](../skills/init-test/SKILL.md)),
+which mirrors upstream AgenTeX's `/init-test` command — it creates a starting
+`config/project.json`, a sample `config/environments/dev.json`, a secrets-only `.env`, and a
+`test/` folder, all idempotent (safe to re-run, never overwrites). Add your own test specs
+under `test/` (any structure works — group stateful scenarios into the same file).
 
 ## 4. Set permissions
 
@@ -73,7 +73,7 @@ executions/execu_<timestamp>/
 
 - Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
 - Browser driver: `npm install -D @playwright/test && npx playwright install chromium`
-- Scaffold: copy `config/*.example` files (see step 3 above)
+- Scaffold: ask Copilot "Set up AgenTeX for this project" (see step 3 above)
 - Run: describe what to test, in plain language
 
 ## Next steps
