@@ -2,6 +2,19 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.5.1] — 2026-08-26
+
+### Added
+- Explicit sign-in step in the install walkthrough: `copilot` prompts
+  `Please use /login to sign in to use Copilot` on first run for an unauthenticated user —
+  documented as its own step in [`DEPLOYMENT.md`](./DEPLOYMENT.md), `README.md`, and
+  [`docs/getting-started.md`](./docs/getting-started.md), with a matching troubleshooting row.
+  Confirmed against a real `copilot` CLI session.
+- `DEPLOYMENT.md`'s primary path is now a fully numbered walkthrough (sign in → install plugin
+  → go to project → install Playwright → scaffold config → grant permissions → run first test
+  → review results → use the other 10 skills), plus a quick-reference table mapping natural
+  requests to which skill they trigger.
+
 ## [2.5.0] — 2026-08-26
 
 ### Added

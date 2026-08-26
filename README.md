@@ -3,7 +3,7 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -74,10 +74,14 @@ tester have caught this" layer that's expensive to script conventionally.
 ## Quick start
 
 ```bash
-# 1. Install the plugin (once, per developer machine)
+# 1. Install the Copilot CLI if you don't have it, and sign in
+npm install -g @github/copilot
+copilot   # if prompted "Please use /login to sign in", run /login and follow the browser flow
+
+# 2. Install the plugin (once, per developer machine)
 copilot plugin install mabdel130/agentex-copilot
 
-# 2. In the project you want to test, install the browser driver
+# 3. In the project you want to test, install the browser driver
 npm install -D @playwright/test && npx playwright install chromium
 ```
 

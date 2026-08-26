@@ -5,7 +5,9 @@ action in your editor's Copilot chat before continuing — this page assumes tha
 
 ## 1. Install the plugin
 
-**Have the Copilot CLI?**
+**Have the Copilot CLI?** Sign in first if needed — running `copilot` prompts
+`Please use /login to sign in to use Copilot` the first time; run `/login` and follow the
+browser flow. Then:
 
 ```bash
 copilot plugin install mabdel130/agentex-copilot

@@ -8,10 +8,31 @@ How to install and configure AgenTeX for real GitHub Copilot use.
 > See [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md#correction-v220) for the full
 > story of what was wrong and why.
 
-## Primary path: install via the Copilot CLI
+## Primary path: install via the Copilot CLI, step by step
 
-If you have the [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/overview)
-(`copilot` on your PATH), this repo is a real plugin — install it directly from GitHub:
+### 1. Install the Copilot CLI (if you don't have it)
+
+```bash
+npm install -g @github/copilot
+copilot --version
+```
+
+### 2. Sign in
+
+```bash
+copilot
+```
+
+If you're not authenticated yet, `copilot` will prompt:
+
+```
+Please use /login to sign in to use Copilot
+```
+
+Run `/login` inside that session and follow the device-login prompt in your browser. Once
+signed in, `/exit` (or Ctrl+C) to leave the interactive session.
+
+### 3. Install the plugin (once per machine)
 
 ```bash
 copilot plugin install mabdel130/agentex-copilot
@@ -24,10 +45,15 @@ and `qa-executor` agents — plus `init-test`, `api-integration`, `db-integratio
 available to Copilot CLI across your projects. No per-project setup step required for the
 agents/skills themselves.
 
-Manage it with the usual commands:
+Verify:
 
 ```bash
 copilot plugin list
+```
+
+Manage it with the usual commands:
+
+```bash
 copilot plugin update mabdel130/agentex-copilot
 copilot plugin disable mabdel130/agentex-copilot   # or: uninstall
 ```
@@ -75,21 +101,30 @@ your-project/
 See [`scripts/install.js`](./scripts/install.js) for exactly what it does — it's a plain,
 dependency-free Node script, nothing hidden.
 
-## Either path: install the browser driver
+## Either path: continue setup
 
-In the project you want to test:
+### 4. Go to the project you want to test
+
+```bash
+cd /path/to/your-project
+```
+
+### 5. Install the browser driver in that project
 
 ```bash
 npm install -D @playwright/test
 npx playwright install chromium
 ```
 
-## Either path: scaffold configuration
+### 6. Scaffold config
 
 **CLI install** — from the project you want to test, ask Copilot to run the bundled
 [`init-test` skill](./skills/init-test/SKILL.md) (mirrors upstream AgenTeX's `/init-test`
 command):
 
+```bash
+copilot
+```
 ```
 Set up AgenTeX for this project.
 ```
@@ -100,14 +135,14 @@ anything already there.
 
 **Fallback installer** — this already happened as part of `npx github:mabdel130/agentex-copilot`.
 
-Either way, fill in:
+Either way, then edit:
 - `config/project.json` — `defaultEnvironment`, KB settings, login mode.
 - `config/environments/dev.json` — target `portalUrl`, test `users`, `db`/`api` blocks.
 - `.env` — the actual secret values referenced by `{ "envSecret": "NAME" }` in the JSON files.
 
 `.env` is gitignored by default — never commit it.
 
-## Grant tool permissions
+### 7. Grant tool permissions
 
 Copilot agent mode needs permission to run a terminal (for Playwright / `sqlcmd` / `curl`) and
 read/write files under `executions/`. Both agent files here deliberately omit a `tools:`
@@ -115,15 +150,19 @@ restriction in frontmatter — per GitHub's docs, that means "all available tool
 browser-driven testing needs. Configure your Copilot tool-approval settings to allow Playwright
 commands outright, and deny reads of `.env` and any destructive terminal commands.
 
-## Run your first test
+### 8. Run your first test
 
-Ask Copilot (CLI or Chat), in plain language:
+Still in the `copilot` session (or in Copilot Chat, agent mode, if you used the fallback
+installer), ask in plain language:
 
 ```
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-## Review results
+The `test-orchestrator` agent restates the plan, waits for your approval, opens a real browser,
+runs each scenario, and writes results.
+
+### 9. Review results
 
 Every run writes to `executions/execu_<timestamp>/`:
 
@@ -133,6 +172,31 @@ executions/execu_<timestamp>/
 ├── bugs/bug-list.md       # merged defect list
 └── ...                    # screenshots and logs per session
 ```
+
+### 10. Use the other skills as needed
+
+These trigger automatically when relevant, or ask for them directly:
+
+| Ask for... | Triggers |
+|---|---|
+| "verify via the API that..." / a spec with `api:` steps | `api-integration` |
+| "check the database for..." / `db:` steps | `db-integration` |
+| "ask the knowledge base how X works" | `ask-kb` |
+| "compare this page to the Figma design" | `ui-check` |
+| "let's define this flow together, step by step" | `define-flow` |
+| Repeated logins slowing a run down | `optimize-login` (usually invoked automatically) |
+| "generate the HTML report" | `extent-report` |
+| "estimate QA effort for these sprint stories" | `task-estimation` |
+| "create test cases for story #1234" | `test-design` |
+| "file these as Azure DevOps bugs" | `bug-report-azure` |
+| Reach an Azure resource directly | `azure-integration` |
+
+The Azure DevOps skills (`task-estimation`, `test-design`, `bug-report-azure`,
+`azure-integration`) additionally need an `azure` block in `config/project.json`
+(org/project/team) and `AZURE_PAT` in `.env` — `init-test` doesn't scaffold these since
+they're optional; add them manually when you need those skills. `ui-check` similarly needs a
+`figma` block + `FIGMA_TOKEN` only for Figma-sourced baselines (screenshot baselines need no
+config at all).
 
 ## CI/CD (optional)
 
@@ -145,6 +209,7 @@ otherwise — AgenTeX reports defects, it does not gate merges by default.
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `Please use /login to sign in to use Copilot` | Not authenticated yet | Run `/login` inside the `copilot` session and complete the device-login flow in your browser (step 2 above). |
 | `copilot plugin install` fails to find the repo | Repo is private, or `copilot` isn't authenticated to GitHub | Confirm `copilot` is logged in and has access; `mabdel130/agentex-copilot` is public. |
 | Copilot Chat doesn't seem to know about AgenTeX (fallback path) | `.github/copilot-instructions.md` missing or not committed | Confirm the file exists at that exact path and is tracked by git. |
 | "environment has no file" | `defaultEnvironment` or requested env doesn't match a file in `config/environments/` | Create the matching `<env>.json` or fix the name — never falls back silently. |
