@@ -2,6 +2,43 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.5.0] — 2026-08-26
+
+### Added
+Full parity with upstream AgenTeX v0.19.0's 12 QA skills — all now real, working `SKILL.md`
+files (not just documented-only references), ported from the upstream Claude Code plugin and
+adapted to this port's `config/` layout:
+
+- `skills/api-integration/` — cataloged `api:` steps, `scripts/run_api.js`.
+- `skills/db-integration/` — cataloged `db:` steps (SQL Server via `sqlcmd`), `scripts/run_db.js`.
+- `skills/ask-kb/` — `kb:` steps against a project's Knowledge Base Ask API, `scripts/ask_kb.js`.
+- `skills/ui-check/` — design-conformance `ui-check:` steps against a Figma frame or image
+  baseline, `scripts/fetch_baseline.js`.
+- `skills/define-flow/` — agent-led, define-by-doing spec authoring in a live browser.
+- `skills/optimize-login/` — pay a login's cost once per session, `scripts/session.js`.
+- `skills/extent-report/` — standalone `extent-report.html` dashboard generator,
+  `scripts/make_html_report.js`.
+- `skills/azure-integration/` — generic Azure CLI (`az`) access.
+- `skills/task-estimation/` — QA effort estimation + `[Testing]` task creation on Azure DevOps
+  User Stories, via `az boards`.
+- `skills/test-design/` — Azure DevOps test case design/creation/linking from a story's ACs,
+  `scripts/testplan.js`.
+- `skills/bug-report-azure/` — files defects as Azure DevOps Bugs via the ADO REST API
+  directly (no `az` CLI), fail-closed writes with an exact ledger; `scripts/create-bug.js`,
+  `scripts/read-workitem.js`, `scripts/check-image.js`.
+- `scripts/lib/tracker/` — the shared, provider-neutral Azure DevOps REST client
+  (`index.js`, `cache.js`, `ledger.js`, `adapters/ado.js`) backing test-design and
+  bug-report-azure. No `az` CLI, no dependencies, built on Node's `fetch`.
+- `references/tracker/ado-boards-cli.md` — shared `az boards`/`az devops` CLI mechanics.
+
+All bundled scripts were smoke-tested manually against real inputs during the port (catalog
+lookups, DDL bans, param sanitization, config-resolution chains for missing org/project/PAT,
+and the HTML/JSON generators) — see the session's tool output for specifics. Their `*.test.js`
+suites were not ported; there's no automated regression suite here yet.
+
+`plugin.json` still declares `"skills": ["skills/"]` (unchanged from v2.4.0) — now backed by
+12 real skills instead of one.
+
 ## [2.4.0] — 2026-08-26
 
 ### Added

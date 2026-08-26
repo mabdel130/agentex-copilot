@@ -17,10 +17,12 @@ If you have the [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/
 copilot plugin install mabdel130/agentex-copilot
 ```
 
-This installs `plugin.json`, `agents/*.agent.md`, and `skills/init-test/` into your per-user
-Copilot plugin store (`~/.copilot/installed-plugins/`), making the `test-orchestrator` and
-`qa-executor` agents — and the `init-test` scaffolding skill — available to Copilot CLI across
-your projects. No per-project setup step required for the agents themselves.
+This installs `plugin.json`, `agents/*.agent.md`, and all 12 skills under `skills/` into your
+per-user Copilot plugin store (`~/.copilot/installed-plugins/`), making the `test-orchestrator`
+and `qa-executor` agents — plus `init-test`, `api-integration`, `db-integration`, `ask-kb`,
+`ui-check`, `define-flow`, `optimize-login`, `extent-report`, and the Azure DevOps skills —
+available to Copilot CLI across your projects. No per-project setup step required for the
+agents/skills themselves.
 
 Manage it with the usual commands:
 

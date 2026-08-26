@@ -3,7 +3,7 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.4.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -185,17 +185,18 @@ agentex-copilot/
 ├── plugin.json                     # real Copilot CLI plugin manifest
 ├── .github/plugin/marketplace.json # self-hosted marketplace listing this one plugin
 ├── agents/                         # test-orchestrator + qa-executor role definitions
-├── scripts/install.js              # fallback installer for non-CLI Copilot Chat users
-├── templates/                      # AGENTS.md / copilot-instructions.md used by the fallback installer
+├── skills/                         # 12 capabilities — see skills/README.md for the full matrix
+├── scripts/
+│   ├── install.js              # fallback installer for non-CLI Copilot Chat users
+│   └── lib/                    # shared project_config.js + Azure DevOps tracker client
+├── references/tracker/         # shared az CLI mechanics reference
+├── templates/                  # AGENTS.md / copilot-instructions.md used by the fallback installer
 ├── docs/
 │   ├── getting-started.md      # first-timer walkthrough
 │   ├── IMPLEMENTATION_GUIDE.md # wiring this into a real, multi-environment project
 │   ├── CONVERSION_REPORT.md    # what changed porting from the Claude Code original
 │   └── ai/                     # context, architecture, security-policy, testing-policy
 ├── config/                     # project.json.example, environments/dev.json.example
-├── skills/
-│   ├── init-test/              # real skill: scaffolds config/ + test/ in your project
-│   └── README.md                # capability reference — what's ported vs. documented-only
 └── DEPLOYMENT.md               # full install + config walkthrough
 ```
 
@@ -205,19 +206,19 @@ Three homes, one job each:
 
 | File | Holds |
 |---|---|
-| `config/project.json` | `defaultEnvironment`, KB settings, login mode |
+| `config/project.json` | `defaultEnvironment`, KB settings, login mode, `azure`/`figma` blocks for the Azure DevOps and ui-check skills |
 | `config/environments/<env>.json` | Target `portalUrl`, test `users`, `db`/`api` integration targets |
 | `.env` | Secrets **only** — referenced by name from the JSON files above, never inlined |
 
-## Roadmap / known gaps
+## What's ported vs. what's left
 
-This is a documentation-and-agent-definition port, not a full 1:1 reimplementation. See
-[`skills/README.md`](./skills/README.md) for the full capability matrix (ported vs.
-documented-only) and [`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md) for the
-complete gap list — in short: `init-test` is the only real `SKILL.md` shipped so far; no
-bundled runner scripts yet for the QA capabilities themselves (`run_api.js`, `run_db.js`, HTML
-report generation), no `ui-check`/`define-flow` implementation yet, and no Azure DevOps
-integration in this port.
+All 12 upstream QA capabilities are real, working skills here — see
+[`skills/README.md`](./skills/README.md) for the full matrix and what each one's bundled
+runner script does. What's still open, per
+[`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md): no bundled sample specs
+(`test/suite1/`), no mobile testing (upstream dropped it too as of v0.19.0), and the bundled
+scripts' own test suites weren't ported (they were smoke-tested manually during the port, but
+there's no automated regression suite here yet).
 
 ## Security
 

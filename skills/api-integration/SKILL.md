@@ -1,0 +1,73 @@
+---
+name: api-integration
+description: >
+  Execute user-defined API calls during test runs, from the project's integration/ catalog.
+  Use whenever a test step needs an HTTP call: verify via API that a UI action persisted,
+  check an endpoint's response, or seed test data through a service. Triggers on spec steps
+  starting with "api:", or requests like "verify via API", "call the endpoint", "check the
+  response". Executes ONLY requests the user has defined in integration/*_api.json — never
+  composes its own HTTP request.
+---
+
+# API Integration — cataloged API steps
+
+Lets test scenarios call APIs **by name**, from definitions the user wrote. Execution is done
+by the bundled runner script (deterministic, enforces the safety rules in code, not agent
+discipline):
+
+```bash
+node <this skill's directory>/scripts/run_api.js \
+  --entry <file-name>.<request-name> --param key=value [--param ...] \
+  [--expect-status 200] [--expect-field <dot.path>] [--expect-equals <dot.path>=<value>] \
+  [--env <environment-name>] --log <path/to/evidence.log>
+```
+
+("This skill's directory" = the folder containing this `SKILL.md`, i.e. wherever this plugin
+was installed — resolve it relative to this file, don't hardcode a path.)
+
+It loads the catalog, validates params, resolves env vars, performs the request, writes the
+evidence log, checks expectations, and prints one JSON line:
+`{"result":"PASS|FAIL|BLOCKED", ...}` (exit 0/1/2). Read
+**`references/api-requests.md`** (next to this file) for the catalog format, curl fallback (if
+node/the script fails), and assertion details.
+
+## The catalog — the ONLY requests you may execute
+
+Definitions live in the **consumer project** at **`./integration/`** (`<service>_api.json`).
+- If the folder/file is missing when a step needs it, scaffold from this skill's
+  `templates/sample_api.json` (never overwrite), then ask the user to define their entries.
+- **Hard rule:** a step naming a request not defined in the catalog is **BLOCKED** — report
+  which definition is missing. Never improvise a request.
+
+## Step syntax in test specs
+
+```
+api: <file-name>.<request-name>(param=value, ...) → <expectation>
+```
+Example: `api: sample-api.get-todo(id=1) → expect HTTP 200 and title present`
+
+## Where the target comes from
+
+1. **`config/environments/<env>.json` `api` block** of the active environment
+   (`--env <name>`, omitted = the project's `defaultEnvironment`):
+   `{ "baseUrl": "https://…", "token": { "envSecret": "API_TOKEN" } }`.
+   The token reference is resolved from `.env` — never a value in JSON.
+2. **Legacy fallback** — the catalog's `${API_BASE_URL}` refs and `auth` block,
+   exactly as before. Old projects keep working untouched.
+
+## Safety rules (also enforced by the runner)
+
+- Writes (POST/PUT/DELETE) run if cataloged — the catalog is the authorization.
+- Secrets stay in env — catalog files hold env-var *names* (`tokenEnv`); never print values.
+- Missing param/env → BLOCKED (sequential mode: ask the user instead).
+
+## Evidence
+
+Runner writes status + headers + body to the `--log` path (under the session's `logs/`).
+Expectation mismatch = **FAIL** defect with that log as evidence, reported in the standard
+defect format from [`../../docs/ai/testing-policy.md`](../../docs/ai/testing-policy.md).
+
+## Preflight
+
+The runner needs only Node (already required for Playwright). For the curl fallback, preflight
+per `references/api-requests.md`.

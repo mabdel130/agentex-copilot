@@ -65,7 +65,7 @@ if (!fs.existsSync(path.join(targetRoot, 'test'))) {
   skipped.push('test/');
 }
 
-appendGitignore(['.env', '.env.*', '!.env.example', 'executions/*', '!executions/README.md']);
+appendGitignore(['.env', '.env.*', '!.env.example', 'executions/*', '!executions/README.md', 'test/.auth/']);
 
 console.log(`\nagentex-copilot init-test — scaffolded ${targetRoot}\n`);
 if (created.length) {

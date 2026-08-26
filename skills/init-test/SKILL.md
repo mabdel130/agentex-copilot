@@ -44,7 +44,7 @@ agent judgment — run it, then explain the results and next steps to the user.
 | `config/project.json` | `config/project.json.example` | `defaultEnvironment`, KB settings, login mode |
 | `config/environments/dev.json` | `config/environments/dev.json.example` | Target `portalUrl`, test `users`, `db`/`api` blocks |
 | `.env` | `.env.example` | Secrets only, referenced by name from the JSON files |
-| `.gitignore` entries | appended, not overwritten | `.env`, `.env.*`, `!.env.example`, `executions/*`, `!executions/README.md` |
+| `.gitignore` entries | appended, not overwritten | `.env`, `.env.*`, `!.env.example`, `executions/*`, `!executions/README.md`, `test/.auth/` |
 
 ## Rules
 

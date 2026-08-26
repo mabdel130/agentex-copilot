@@ -67,7 +67,10 @@ Glob↔glob, Browser↔browser — all 1:1 compatible, no deprecated tools invol
 - The autonomy boundary: no real signup/login/checkout, no real personal data, never print
   secrets, never modify application source.
 
-## Known gaps vs. the original (v0.19.0)
+## Known gaps vs. the original (v0.19.0) — as of v2.4.0
+
+All of the gaps below were closed in v2.5.0 (see that section further down) — kept here as the
+historical record of what v2.0.0–v2.4.0 actually shipped.
 
 - No bundled sample specs (`test/suite1/`) yet — add your own; see
   [`IMPLEMENTATION_GUIDE.md`](./IMPLEMENTATION_GUIDE.md#4-write-real-specs).
@@ -192,6 +195,47 @@ GitHub's own shipped example at
 [github/copilot-plugins](https://github.com/github/copilot-plugins/blob/main/plugins/build-perf-cpp/skills/build-performance-analysis/SKILL.md),
 fetched and read directly rather than summarized secondhand.
 
+## Full skill parity (v2.5.0)
+
+Closes every remaining gap listed above (except the two noted as still open below). All 12
+upstream QA skills are now real `skills/<name>/SKILL.md` files, ported directly from a fresh
+clone of `MhmdElGazzar/agentex` at v0.19.0 rather than re-derived from memory:
+
+- **api-integration, db-integration, ask-kb, ui-check, extent-report, optimize-login** — each
+  skill's bundled runner script (`run_api.js`, `run_db.js`, `ask_kb.js`, `fetch_baseline.js`,
+  `make_html_report.js`, `session.js`) already used relative `require()` paths with no
+  Claude-specific assumptions, so the scripts ported verbatim or near-verbatim. Path references
+  inside `SKILL.md`/reference docs (`${CLAUDE_PLUGIN_ROOT}/...`, `environments/<env>.json`) were
+  rewritten to this port's conventions (skill-relative paths, `config/environments/`).
+- **define-flow** — no script, just an adapted `SKILL.md` (removed Claude-specific
+  `playwright-cli` session-flag syntax and `/execute-test` command references in favor of the
+  `test-orchestrator` agent).
+- **azure-integration, task-estimation, test-design** — adapted `SKILL.md`s driving `az`/
+  `az boards` directly, plus a shared `references/tracker/ado-boards-cli.md` at the plugin root
+  (also already `config/project.json`-native upstream).
+- **bug-report-azure** — the largest single addition: `scripts/create-bug.js`,
+  `read-workitem.js`, `check-image.js`, plus the shared REST client library
+  `scripts/lib/tracker/` (`index.js`, `cache.js`, `ledger.js`, `adapters/ado.js`) that
+  test-design's `scripts/testplan.js` also depends on. None of it spawns `az`; it's direct
+  ADO REST over Node's built-in `fetch`, with a fail-closed write ledger. Two hardcoded
+  `(the /init-test wizard writes it)` messages were corrected to reflect that this port's
+  `init-test` skill doesn't scaffold Azure-specific config fields (upstream's wizard did;
+  this port doesn't have one).
+
+**Verification approach:** with no live Azure DevOps org, KB server, or Figma file available
+to test against, verification focused on what's actually load-bearing for correctness — the
+guard rails: catalog-only enforcement (undefined `api:`/`db:` entries → `BLOCKED`), the DDL ban,
+param sanitization (SQL-injection-shaped values rejected), and the config-resolution chain
+(missing org/project/PAT surfaces the right error at the right layer, in order). All confirmed
+against real script runs, not just read for plausibility. `make_html_report.js` was run
+against a real sample JSON and produced valid HTML. Two real network calls in this environment
+failed for lack of egress (not a code defect — `run_api.js`'s `BLOCKED`/`FAIL` paths both
+behaved correctly around the failure).
+
+**Still open**, unrelated to this pass: no bundled sample specs, no mobile testing (matches
+upstream v0.19.0), and no `*.test.js` suites were ported — see
+[`skills/README.md`](../skills/README.md#known-gaps-vs-upstream).
+
 ## Versioning note
 
 This repository started at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
@@ -199,7 +243,9 @@ This repository started at `2.0.0` to signal "port of a mature project," not a f
 vendoring; `2.2.0` corrects that — the plugin system is real, `plugin.json` + `agents/` is the
 primary install path again, and vendoring is kept as a documented fallback. `2.3.0` added a
 self-hosted marketplace; `2.4.0` added the first real skill and corrected the skill-format
-documentation. Agent *behavior* in `agents/*.agent.md` has not changed across any of these
-corrections — only how the plugin is installed, packaged, and described. Future releases should
-track new capabilities against the gaps listed earlier, and re-run the mapping whenever the
+documentation; `2.5.0` ported the remaining 11 skills for full upstream parity. Agent
+*behavior* in `agents/*.agent.md` has not changed across any of these releases — only how the
+plugin is installed, packaged, and described, and (as of 2.5.0) how much of upstream's
+capability surface is actually implemented here. Future releases should track new capabilities
+against the gaps listed earlier, and re-run the mapping whenever the
 upstream `agentex` plugin.json version changes.
