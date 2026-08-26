@@ -1,0 +1,21 @@
+# Node
+node_modules/
+
+# Playwright scratch
+.playwright/
+
+# QA run artifacts — keep the folder + its README, ignore actual run outputs
+executions/*
+!executions/README.md
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Copilot / editor local settings (machine-specific)
+.vscode/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db

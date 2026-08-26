@@ -1,0 +1,9 @@
+{
+  "name": "my-project",
+  "defaultEnvironment": "dev",
+  "kb": {
+    "baseUrl": "",
+    "project": ""
+  },
+  "login": { "mode": "session" }
+}
