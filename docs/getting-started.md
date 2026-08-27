@@ -5,6 +5,10 @@ action in your editor's Copilot chat before continuing — this page assumes tha
 
 ## 1. Install the plugin
 
+Pick exactly one path:
+- **Copilot CLI installed** → use the plugin install path below.
+- **VS Code Copilot Chat only** → skip to the fallback path below.
+
 **Have the Copilot CLI?** Sign in first if needed — running `copilot` prompts
 `Please use /login to sign in to use Copilot` the first time; run `/login` and follow the
 browser flow. Then:
@@ -21,6 +25,15 @@ npx github:mabdel130/agentex-copilot --target .
 ```
 
 Full detail on both paths, and why two paths exist: [DEPLOYMENT.md](../DEPLOYMENT.md).
+
+### Fastest happy path
+
+If you just want the shortest route to a first run:
+
+1. Install AgenTeX using one path above.
+2. In the project you want to test, run `npm install -D @playwright/test` and `npx playwright install chromium`.
+3. If you used the CLI install path, ask Copilot: `Set up AgenTeX for this project.`
+4. Ask Copilot: `Test https://example.com — the signup form: happy path plus empty and bad-email cases.`
 
 ## 2. Install the browser driver
 

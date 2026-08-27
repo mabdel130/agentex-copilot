@@ -85,8 +85,18 @@ copilot plugin install mabdel130/agentex-copilot
 npm install -D @playwright/test && npx playwright install chromium
 ```
 
-Then, from that project, ask Copilot to scaffold config (this runs the bundled `init-test`
-skill — mirrors upstream AgenTeX's `/init-test` command):
+### Pick one install path
+
+- **Using the Copilot CLI?** Stay on the path above.
+- **Using VS Code Copilot Chat only?** Skip the CLI install steps and run this instead from the
+  project you want to test:
+
+```bash
+npx github:mabdel130/agentex-copilot --target .
+```
+
+Then, from the project you want to test, ask Copilot to scaffold config (this runs the bundled
+`init-test` skill — mirrors upstream AgenTeX's `/init-test` command):
 
 ```
 Set up AgenTeX for this project.

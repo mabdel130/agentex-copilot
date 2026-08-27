@@ -12,6 +12,32 @@ const path = require('path');
 const sourceRoot = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const targetArgIndex = args.indexOf('--target');
+
+function printUsage(stream = process.stdout) {
+  stream.write(`Usage:
+  npx github:mabdel130/agentex-copilot --target /path/to/your-project
+  npx github:mabdel130/agentex-copilot              # installs into the current directory
+
+Options:
+  --target <path>   Project to scaffold for AgenTeX
+  -h, --help        Show this help message
+`);
+}
+
+if (args.includes('-h') || args.includes('--help')) {
+  printUsage();
+  process.exit(0);
+}
+
+if (targetArgIndex !== -1) {
+  const targetValue = args[targetArgIndex + 1];
+  if (!targetValue || targetValue.startsWith('-')) {
+    printUsage(process.stderr);
+    console.error('\nError: --target requires a directory path.');
+    process.exit(1);
+  }
+}
+
 const targetRoot = path.resolve(targetArgIndex !== -1 ? args[targetArgIndex + 1] : process.cwd());
 
 if (targetRoot === sourceRoot) {
