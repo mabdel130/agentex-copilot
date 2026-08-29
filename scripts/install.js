@@ -2,9 +2,9 @@
 // Fallback installer for environments without the `copilot` CLI (e.g. VS Code Copilot Chat
 // only). If you have the Copilot CLI, prefer:
 //   copilot plugin install mabdel130/agentex-copilot
-// This script vendors the same agent/policy files directly into a project instead, plus a
-// .github/copilot-instructions.md pointer so Copilot Chat picks them up automatically. It never
-// overwrites a file that already exists — safe to re-run.
+// This script vendors the same agent, browser-testing skill, and policy files directly into a
+// project instead, plus a .github/copilot-instructions.md pointer so Copilot Chat picks them up
+// automatically. It never overwrites a file that already exists — safe to re-run.
 
 const fs = require('fs');
 const path = require('path');
@@ -78,8 +78,12 @@ function ensureFile(destPath, srcPath) {
   created.push(path.relative(targetRoot, destPath));
 }
 
-// 1. Vendor the agent role definitions and policy docs.
+// 1. Vendor the agent role definitions, browser-testing skill, and policy docs.
 copyDir(path.join(sourceRoot, 'agents'), path.join(targetRoot, '.github', 'agentex', 'agents'));
+copyDir(
+  path.join(sourceRoot, 'skills', 'browser-testing'),
+  path.join(targetRoot, '.github', 'agentex', 'skills', 'browser-testing')
+);
 copyDir(path.join(sourceRoot, 'docs', 'ai'), path.join(targetRoot, '.github', 'agentex', 'ai-docs'));
 
 // 2. Entrypoint files (never overwritten if the project already has its own).

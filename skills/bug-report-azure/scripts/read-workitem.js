@@ -102,6 +102,6 @@ module.exports = { run };
 if (require.main === module) {
   run(process.argv.slice(2)).then(({ code, out }) => {
     console.log(JSON.stringify(out));
-    process.exit(code);
+    process.exitCode = code;
   });
 }

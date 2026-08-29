@@ -56,7 +56,9 @@ Replace or extend the sample specs with ones for your actual application. Guidel
 
 ## 6. Review and act on results
 
-`report.md` and `extent-report.html` are the two artifacts to check after every run.
+`report.md`, `run-summary.json`, and `extent-report.html` are the run-level artifacts to check
+after every execution. `run-summary.json` is the durable, safe machine-readable source for the
+interactive dashboard; keep it alongside `report.md`.
 `bugs/bug-list.md` is meant to be pasted into your own issue tracker — AgenTeX does not file
 issues on your behalf; see [`skills/README.md`](../skills/README.md) for what is and isn't
 automated.

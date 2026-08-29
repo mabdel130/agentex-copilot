@@ -68,6 +68,8 @@ EXECUTION RULES
 OUTPUT (your final message only — it is consumed by the orchestrator, not a human):
 - A heading naming the test you ran.
 - Per scenario: PASS / FAIL, observed vs expected, screenshot path, console/network notes.
+- Per scenario: active execution duration in milliseconds and ISO-8601 start/end timestamps.
+  The orchestrator uses this metadata in its run-level summary; never write outside your session.
 - `kb:` steps are reported as an advisory note (the KB answer, or "not covered in the KB"),
   never as a scenario PASS / FAIL and never counted in the final pass/fail tally.
 - A defect list, each: Title / Steps to reproduce / Expected vs Actual /
@@ -75,3 +77,5 @@ OUTPUT (your final message only — it is consumed by the orchestrator, not a hu
 - BUG EVIDENCE: an explicit list of screenshot paths (under `SESSION_DIR/screenshots/`) that
   prove each defect, so the orchestrator can copy them into the run's `bugs/` folder.
 - A final one-line tally: "<n> pass / <m> fail, <k> defects".
+- Return only safe summary data: never include credentials, secret values, `{ "envSecret": ... }`
+  references, API/DB payloads, or full logs.

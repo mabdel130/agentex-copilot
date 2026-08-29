@@ -5,9 +5,9 @@ installed. Read this before `architecture.md`, `security-policy.md`, and `testin
 
 ## What this plugin is
 
-AgenTeX for GitHub Copilot is a QA automation plugin, ported from
-[AgenTeX](https://github.com/MhmdElGazzar/agentex) (v0.19.0), a mature Claude Code plugin with
-the same name. It turns manual test execution into an agentic workflow: an agent plans
+AgenTeX for GitHub Copilot is a QA automation plugin adapted from
+[AgenTeX](https://github.com/MhmdElGazzar/agentex), a mature Claude Code plugin with the same
+name. It turns manual test execution into an agentic workflow: an agent plans
 scenarios, drives a real browser, captures evidence, and produces a defect report. See
 [`docs/CONVERSION_REPORT.md`](../CONVERSION_REPORT.md) for exactly what changed in the port.
 
@@ -22,16 +22,15 @@ browser testing, without writing and maintaining a full test automation framewor
   would, for scenarios that are expensive to script conventionally.
 - Not an autonomous bug-fixer — it **never modifies application code**, only reports findings.
 - Not a load/performance testing tool.
-- Not (in this v2.0.0 port) a mobile testing tool, and not an Azure DevOps integration — those
-  exist in the upstream Claude Code plugin but are out of scope here; see
-  [`docs/CONVERSION_REPORT.md`](../CONVERSION_REPORT.md#known-gaps-vs-the-original).
+- Not a mobile testing tool. Azure DevOps planning, test design, and bug reporting are available
+  through the corresponding installed skills, subject to their configuration and approval rules.
 
 ## Capabilities available to the agents (upstream reference)
 
-The upstream AgenTeX plugin ships 12 skills; this port's agents (`test-orchestrator`,
-`qa-executor`) implement the core browser-testing loop directly, and document the other
-capabilities in [`skills/README.md`](../../skills/README.md) as the ported plugin's roadmap.
-Full descriptions live there; the short version:
+This plugin ships 13 skills, including the Copilot-native `init-test` skill. The
+`browser-testing` skill delegates the core loop to the `test-orchestrator` and `qa-executor`
+agents. Full descriptions live in [`skills/README.md`](../../skills/README.md); the short
+version:
 
 - **browser-testing** — the core loop this port implements.
 - **api-integration** / **db-integration** — catalog-only `api:`/`db:` spec steps.
@@ -41,7 +40,7 @@ Full descriptions live there; the short version:
 - **optimize-login** — pay a login's cost once per session, not once per test.
 - **extent-report** — render `report.md` results as an interactive HTML dashboard.
 - **azure-integration**, **task-estimation**, **test-design**, **bug-report-azure** — Azure
-  DevOps planning and bug-filing, not part of this port.
+  resource access plus Azure DevOps planning and bug filing.
 
 ## How an agent should orient itself
 

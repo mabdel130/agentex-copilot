@@ -69,8 +69,9 @@ Glob↔glob, Browser↔browser — all 1:1 compatible, no deprecated tools invol
 
 ## Known gaps vs. the original (v0.19.0) — as of v2.4.0
 
-All of the gaps below were closed in v2.5.0 (see that section further down) — kept here as the
-historical record of what v2.0.0–v2.4.0 actually shipped.
+Most of the gaps below were closed in v2.5.0 (see that section further down); the sample-specs
+gap specifically was closed slightly later, in "Closing the command-equivalent gaps" further
+down still. Kept here as the historical record of what v2.0.0–v2.4.0 actually shipped.
 
 - No bundled sample specs (`test/suite1/`) yet — add your own; see
   [`IMPLEMENTATION_GUIDE.md`](./IMPLEMENTATION_GUIDE.md#4-write-real-specs).
@@ -236,6 +237,61 @@ behaved correctly around the failure).
 upstream v0.19.0), and no `*.test.js` suites were ported — see
 [`skills/README.md`](../skills/README.md#known-gaps-vs-upstream).
 
+## Closing the command-equivalent gaps
+
+Upstream ships a `commands/` folder — `ask-kb.md`, `define-flow.md`, `design-test.md`,
+`estimate-story.md`, `execute-test.md`, `init-test.md`, `update-agentex.md` — each a thin
+Claude Code slash-command wrapper that parses `$ARGUMENTS` and delegates to a skill. This port
+never had a `commands/` folder, on purpose: **`commands` is not a confirmed GitHub Copilot
+plugin feature.** It appeared once, in an AI-summarized fetch of a schema-reference page — the
+same secondhand-summary failure mode that caused the v2.0.0/v2.1.0 back-and-forth documented
+above. Checked directly this time: GitHub's own two official example plugins at
+[github/copilot-plugins](https://github.com/github/copilot-plugins) (`build-perf-cpp`, `spark`)
+use only `skills` (and `hooks`, for `build-perf-cpp`) — neither has a `commands/` folder, and
+`spark` doesn't even ship a `plugin.json`. Adding one here would repeat the exact mistake this
+document exists to catalog, so this port keeps delegating via natural-language skill triggers
+(the confirmed mechanism) instead.
+
+That said, six of those seven commands' *behavior* is real and worth having, and most of it
+already existed via the skill it delegated to. What was actually missing, closed in this pass:
+
+- **`execute-test`'s bare suite-name resolution** (`suite3/` → `./test/suite3/`) — added to
+  `agents/test-orchestrator.agent.md`'s new "Suite/scope resolution" section.
+- **`execute-test`'s auto-scaffold-from-samples** when `test/` is empty — same section; the
+  agent now seeds `test/suite1/` from this plugin's own bundled samples (see below) rather than
+  silently having nothing to run.
+- **`init-test`'s `integration/` catalog scaffolding** — upstream's `/init-test` (via its setup
+  wizard) seeds `integration/sample_api.json` / `sample_db.json`; this port's `init-test` skill
+  now does the same, copying from the `api-integration` / `db-integration` skills' own
+  `templates/` (no new content needed — those templates already existed, they just weren't
+  being copied anywhere).
+- **Bundled `test/suite1/` sample specs** — ported from upstream's `test/suite1/` (generic
+  fixtures, no Claude-specific content) into this repo's own `test/` folder, referenced by both
+  `init-test` and the orchestrator's auto-scaffold path. `test/README.md` was rewritten (not
+  copied verbatim) to describe this port's conventions (`config/environments/`, skill names)
+  rather than upstream's command names.
+- **`ask-kb`, `define-flow`, `design-test`, `estimate-story` commands** — no gap; each was a
+  thin argument-parsing shim around a skill this port already has in full
+  (`ask-kb`/`define-flow`/`test-design`/`task-estimation`). Natural-language invocation already
+  covers what `$ARGUMENTS` parsing did.
+
+**Intentionally not ported, and not planned:**
+
+- **`init-test`'s Setup Wizard** — upstream's `/init-test` can launch a local bilingual
+  (Arabic/English) web UI (`scripts/wizard/server.js`, a Node HTTP server opened in a browser)
+  for interactively filling config. This is Claude-Code-specific tooling (spawning a local
+  server + opening a browser from an agent's Bash tool) with no equivalent invocation model in
+  Copilot CLI/Chat, and scaffolding via plain files (this port's actual `init-test`) covers the
+  same end state without it.
+- **`update-agentex`** — upstream's self-migration engine (`scripts/migrate.js` +
+  `scripts/lib/migrations/`) detects a consumer project's scaffold version and migrates it
+  forward across upstream's own scaffold history (legacy `.env`-only → `environments/` →
+  `config/`, etc.). That history is specific to *upstream's* schema evolution — this port has
+  had exactly one config shape since v2.0.0, so there is nothing yet to migrate *from*. If this
+  port's own `config/` schema changes in a way that breaks existing consumer projects, a
+  same-spirit migration skill should be built then, scoped to this port's actual history, not a
+  translation of upstream's.
+
 ## Versioning note
 
 This repository started at `2.0.0` to signal "port of a mature project," not a from-scratch v1.
@@ -249,3 +305,23 @@ plugin is installed, packaged, and described, and (as of 2.5.0) how much of upst
 capability surface is actually implemented here. Future releases should track new capabilities
 against the gaps listed earlier, and re-run the mapping whenever the
 upstream `agentex` plugin.json version changes.
+
+## Upstream v0.21 compatibility (v2.6.0)
+
+Upstream's durable run record and enriched HTML report were adapted as `run-summary.json`
+(schema version 2), the enhanced extent-report renderer, and matching Copilot agent
+instructions. Version 2.6.1 also adds `skills/browser-testing/SKILL.md` as the discoverable
+Copilot entry point; it delegates execution to the Copilot-native agents instead of duplicating
+the upstream Claude workflow. The upstream's remaining v0.20/v0.21 additions include Claude
+headless CI launching, a Claude self-update runner, Claude-era configuration migrations, a
+local setup wizard, and upstream-only release/evaluation fixtures. They are not copied because
+they either invoke Claude Code or maintain the upstream repository rather than an installed
+plugin.
+
+The historical "commands is not a confirmed GitHub Copilot plugin feature" statement above is
+superseded: the current GitHub Copilot CLI plugin reference permits a `commands` manifest path.
+However, GitHub's published plugin authoring guidance does not specify a command-file format
+that makes the upstream `$ARGUMENTS` wrappers portable. The plugin therefore uses its installed
+skills and `test-orchestrator` agent as the supported equivalents rather than shipping wrappers
+that would be unverified in Copilot. See [`COPILOT_EQUIVALENTS.md`](./COPILOT_EQUIVALENTS.md)
+for the complete mapping and the documented CLI commands for plugin updates.

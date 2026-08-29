@@ -1,22 +1,23 @@
 # Skills — QA Capability Reference
 
 `plugin.json` declares `"skills": ["skills/"]`. Every capability below is a real, working
-`SKILL.md` (plus bundled runner scripts where the upstream skill had them) — ported from
-[AgenTeX](https://github.com/MhmdElGazzar/agentex) v0.19.0, adapted to this plugin's
+`SKILL.md` (plus bundled runner scripts where needed) — adapted from
+[AgenTeX](https://github.com/MhmdElGazzar/agentex) and extended for this plugin's
 `config/` layout and to the real [Agent Skills specification](https://agentskills.io/specification)
 (no `input` schema field — skills trigger by matching `description` against the user's
 request, not typed invocation). See [`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md)
 for the full conversion history.
 
-This plugin's two agents (`test-orchestrator`, `qa-executor` — see [`../agents/`](../agents/))
-implement the core browser-testing loop directly; everything below is additional capability
-invoked by name or by natural-language trigger during a run.
+The `browser-testing` skill is the primary entry point and delegates the core loop to the two
+agents (`test-orchestrator`, `qa-executor` — see [`../agents/`](../agents/)). The remaining
+skills are invoked by name or natural-language trigger during a run.
 
 ## Capabilities
 
 | Skill | What it does |
 |---|---|
-| **[init-test](./init-test/SKILL.md)** | Scaffolds `config/project.json`, `config/environments/dev.json`, `.env`, and `test/` in the project you want to test — idempotent, never overwrites. The Copilot-native equivalent of upstream's `/init-test` command. |
+| **[browser-testing](./browser-testing/SKILL.md)** | The primary entry point for testing a web application. Delegates to the `test-orchestrator` / `qa-executor` agents for real Playwright execution, sequential approvals or autonomous parallel regression, evidence capture, and durable run reports. |
+| **[init-test](./init-test/SKILL.md)** | Scaffolds `config/project.json`, `config/environments/dev.json`, `.env`, an `integration/` catalog with sample API/DB entries, and starter `test/suite1/` specs (only when the project has none of its own) — idempotent, never overwrites. The Copilot-native equivalent of upstream's `/init-test` command. |
 | **[api-integration](./api-integration/SKILL.md)** | Executes user-defined API calls from the project's `integration/*_api.json` catalog for `api:` test-spec steps — never an improvised HTTP request. Bundled runner: `scripts/run_api.js`. |
 | **[db-integration](./db-integration/SKILL.md)** | Executes user-defined database queries from `integration/*_db.json` for `db:` steps (SQL Server via `sqlcmd`) — catalog-only, DDL always refused. Bundled runner: `scripts/run_db.js`. |
 | **[ask-kb](./ask-kb/SKILL.md)** | Answers `kb:` steps by querying the project's Knowledge Base Ask API. Advisory context only — never PASS/FAIL evidence. Bundled runner: `scripts/ask_kb.js`. |
@@ -44,16 +45,27 @@ Several skills above share code rather than duplicating it, at the plugin root:
   used by task-estimation and test-design (which still drive `az` directly for their own
   workflows; bug filing does not).
 
+## Command equivalents
+
+Upstream ships thin Claude Code slash-command wrappers (`commands/*.md`) around several
+skills. GitHub Copilot CLI supports a `commands` manifest path, but GitHub's published plugin
+authoring guide does not define a portable format for the upstream Claude `$ARGUMENTS` wrappers.
+The plugin therefore uses natural-language skill activation and the `test-orchestrator` agent
+as the supported interface. See [`../docs/COPILOT_EQUIVALENTS.md`](../docs/COPILOT_EQUIVALENTS.md)
+for the command-by-command mapping.
+
 ## Known gaps vs. upstream
 
-- No bundled sample specs (`test/suite1/`) — add your own; see
-  [`../docs/IMPLEMENTATION_GUIDE.md`](../docs/IMPLEMENTATION_GUIDE.md#4-write-real-specs).
 - No mobile testing support (upstream itself no longer ships a dedicated mobile-testing skill
   as of v0.19.0).
 - Test files (`*.test.js`) for the bundled scripts were not ported — the scripts themselves
   were smoke-tested manually during the port (catalog lookups, DDL bans, config-resolution
   chains, and the HTML/JSON generators all verified against real inputs), but there's no
   automated regression suite here yet.
+- Upstream's `init-test` Setup Wizard (a local bilingual web UI for interactive config) and its
+  `update-agentex` self-migration engine are intentionally not ported — see
+  [`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md#closing-the-command-equivalent-gaps)
+  for why.
 
 ## Adding or updating a skill
 

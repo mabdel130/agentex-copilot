@@ -49,13 +49,16 @@ The generator script lives in this skill's `scripts/` folder:
    produced them), and the Total # of TC (their sum).
 2. Pick a descriptive report title — not just "Testing Execution Status" alone. Name the
    run/suite and the date, e.g. "Suite2 Regression — 2026-07-08" or "Login Sample — 2026-07-08".
-3. Build a temporary JSON file describing the run (shape below), then generate the report:
+3. Write the durable `executions/<run>/run-summary.json` describing the run (shape below), then
+   generate the report from it:
    ```bash
    node <this skill's directory>/scripts/make_html_report.js \
-     "<run>.json" \
+     "executions/<run>/run-summary.json" \
      "executions/<run>/extent-report.html"
    ```
-4. Delete the temporary JSON input file afterward — it is not a retained artifact.
+4. For richer run context, timing, evidence previews, and defect cards, use schema version 2 as
+   specified in `references/run-summary-schema.md`. The renderer remains compatible with the
+   legacy input shape, but all new runs should persist schema version 2.
 5. Link the HTML report from `report.md` — add a line after the per-testcase narrative:
    `**Interactive report:** [extent-report.html](./extent-report.html)`.
 
@@ -102,3 +105,5 @@ not run-level artifacts.
 - Never hand-edit the generated HTML — regenerate it from the JSON summary instead.
 - Never write real user data into `testCases`/`steps` notes — use the same disposable values the
   test run itself used.
+- Never write credential values, secret names, raw API/DB payloads, or full logs into
+  `run-summary.json`; reference the corresponding evidence file instead.

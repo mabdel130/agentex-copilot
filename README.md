@@ -3,7 +3,7 @@
 **Stop clicking through the same test cases by hand. Describe what to test, in plain English,
 and let an agent plan it, run it in a real browser, and hand you back a defect report.**
 
-[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.6.2-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -137,7 +137,9 @@ Every run writes to a timestamped folder — nothing scattered elsewhere in your
 ```
 executions/execu_2026-08-26_11-00-53/
 ├── report.md                          # what passed, what failed, why
-├── browser-sessions/default/
+├── run-summary.json                   # durable machine-readable run record
+├── extent-report.html                 # interactive dashboard
+├── browser-sessions/<unique-session>/
 │   ├── screenshots/                   # one per scenario, pass AND fail
 │   └── logs/                          # console + network capture per scenario
 └── bugs/
@@ -199,7 +201,7 @@ agentex-copilot/
 ├── plugin.json                     # real Copilot CLI plugin manifest
 ├── .github/plugin/marketplace.json # self-hosted marketplace listing this one plugin
 ├── agents/                         # test-orchestrator + qa-executor role definitions
-├── skills/                         # 12 capabilities — see skills/README.md for the full matrix
+├── skills/                         # 13 capabilities — see skills/README.md for the full matrix
 ├── scripts/
 │   ├── install.js              # fallback installer for non-CLI Copilot Chat users
 │   └── lib/                    # shared project_config.js + Azure DevOps tracker client
@@ -226,13 +228,13 @@ Three homes, one job each:
 
 ## What's ported vs. what's left
 
-All 12 upstream QA capabilities are real, working skills here — see
-[`skills/README.md`](./skills/README.md) for the full matrix and what each one's bundled
-runner script does. What's still open, per
-[`docs/CONVERSION_REPORT.md`](./docs/CONVERSION_REPORT.md): no bundled sample specs
-(`test/suite1/`), no mobile testing (upstream dropped it too as of v0.19.0), and the bundled
-scripts' own test suites weren't ported (they were smoke-tested manually during the port, but
-there's no automated regression suite here yet).
+All 12 upstream QA capabilities plus the Copilot-native `init-test` skill are available here —
+see [`skills/README.md`](./skills/README.md) for the full matrix and each bundled runner. The
+browser-testing skill includes the Playwright reference and portable preflight/run/evidence
+helpers, while the Copilot agents own test orchestration. Mobile testing remains unsupported.
+See
+[Copilot equivalents for upstream-only components](./docs/COPILOT_EQUIVALENTS.md) for the
+supported replacement for each Claude-specific or maintainer-only upstream feature.
 
 ## Security
 

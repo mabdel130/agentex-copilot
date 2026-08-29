@@ -2,11 +2,12 @@
 name: init-test
 description: >
   Scaffold AgenTeX's QA-testing configuration in the current project: config/project.json,
-  config/environments/dev.json, a secrets-only .env, and a test/ directory for specs. Use this
-  skill when the user wants to set up, initialize, or scaffold AgenTeX/QA testing in a new
-  project, or asks things like "init test", "set up agentex here", "scaffold the QA config",
-  or "get this project ready for testing". Idempotent — never overwrites a file that already
-  exists, so it's also safe to re-run after a partial setup.
+  config/environments/dev.json, a secrets-only .env, an integration/ catalog with sample
+  api/db entries, and starter test/suite1/ specs (only when the project has no specs of its
+  own yet). Use this skill when the user wants to set up, initialize, or scaffold AgenTeX/QA
+  testing in a new project, or asks things like "init test", "set up agentex here", "scaffold
+  the QA config", or "get this project ready for testing". Idempotent — never overwrites a
+  file that already exists, so it's also safe to re-run after a partial setup.
 ---
 
 # Init Test — scaffold AgenTeX configuration
@@ -32,6 +33,11 @@ agent judgment — run it, then explain the results and next steps to the user.
    - Install the browser driver: `npm install -D @playwright/test && npx playwright install chromium`
    - Edit `config/environments/dev.json` — at minimum set `portalUrl` to the site under test.
    - Fill in `.env` for any secrets referenced via `{ "envSecret": "NAME" }`.
+   - Replace the samples in `integration/` with the project's real API/DB catalog entries (if
+     `api:`/`db:` steps are needed) — see [`../api-integration/SKILL.md`](../api-integration/SKILL.md)
+     and [`../db-integration/SKILL.md`](../db-integration/SKILL.md).
+   - If `test/suite1/` was seeded, tell the user those are editable examples to adapt to their
+     app, not a real test suite yet.
    - Ask for a test: e.g. "Test https://example.com — the signup form."
 5. If the script reports every file as `[skipped]` (already present), say so plainly rather than
    implying fresh setup happened — the user may be re-running this after already configuring
@@ -44,6 +50,9 @@ agent judgment — run it, then explain the results and next steps to the user.
 | `config/project.json` | `config/project.json.example` | `defaultEnvironment`, KB settings, login mode |
 | `config/environments/dev.json` | `config/environments/dev.json.example` | Target `portalUrl`, test `users`, `db`/`api` blocks |
 | `.env` | `.env.example` | Secrets only, referenced by name from the JSON files |
+| `integration/sample_api.json` | `../api-integration/templates/sample_api.json` | Example cataloged API entries for `api:` steps |
+| `integration/sample_db.json` | `../db-integration/templates/sample_db.json` | Example cataloged DB entries for `db:` steps |
+| `test/README.md`, `test/suite1/*.md` | this plugin's `test/` folder | Starter specs — **only seeded if `test/` doesn't already exist or is empty**; a project with its own specs under `test/` is left completely untouched |
 | `.gitignore` entries | appended, not overwritten | `.env`, `.env.*`, `!.env.example`, `executions/*`, `!executions/README.md`, `test/.auth/` |
 
 ## Rules

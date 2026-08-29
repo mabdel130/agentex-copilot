@@ -38,7 +38,7 @@ signed in, `/exit` (or Ctrl+C) to leave the interactive session.
 copilot plugin install mabdel130/agentex-copilot
 ```
 
-This installs `plugin.json`, `agents/*.agent.md`, and all 12 skills under `skills/` into your
+This installs `plugin.json`, `agents/*.agent.md`, and all 13 skills under `skills/` into your
 per-user Copilot plugin store (`~/.copilot/installed-plugins/`), making the `test-orchestrator`
 and `qa-executor` agents — plus `init-test`, `api-integration`, `db-integration`, `ask-kb`,
 `ui-check`, `define-flow`, `optimize-login`, `extent-report`, and the Azure DevOps skills —
@@ -93,6 +93,7 @@ your-project/
 │   ├── copilot-instructions.md           # read by Copilot Chat on every request
 │   └── agentex/
 │       ├── agents/                       # test-orchestrator.agent.md, qa-executor.agent.md
+│       ├── skills/browser-testing/        # Playwright reference + portable run helpers
 │       └── ai-docs/                      # security-policy.md, testing-policy.md, architecture.md
 ├── config/project.json
 └── config/environments/dev.json
@@ -169,6 +170,8 @@ Every run writes to `executions/execu_<timestamp>/`:
 ```
 executions/execu_<timestamp>/
 ├── report.md              # the final summary
+├── run-summary.json       # durable machine-readable run record
+├── extent-report.html     # interactive dashboard
 ├── bugs/bug-list.md       # merged defect list
 └── ...                    # screenshots and logs per session
 ```
@@ -179,6 +182,7 @@ These trigger automatically when relevant, or ask for them directly:
 
 | Ask for... | Triggers |
 |---|---|
+| "test this URL", "run a browser regression", or "test this form" | `browser-testing` → `test-orchestrator` |
 | "verify via the API that..." / a spec with `api:` steps | `api-integration` |
 | "check the database for..." / `db:` steps | `db-integration` |
 | "ask the knowledge base how X works" | `ask-kb` |

@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Self-hosted marketplace for the AgenTeX GitHub Copilot plugin — agentic QA testing via Playwright.",
-    "version": "2.5.1"
+    "version": "2.6.2"
   },
   "plugins": [
     {
       "name": "agentex-copilot",
       "description": "Agentic QA for GitHub Copilot — plans and runs browser tests, driving a real Playwright browser, with structured evidence and a consolidated defect report.",
-      "version": "2.5.1",
+      "version": "2.6.2",
       "source": "."
     }
   ]

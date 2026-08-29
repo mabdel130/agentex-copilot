@@ -283,6 +283,12 @@ async function run(argv, { cwd = process.cwd(), fetch } = {}) {
   const args = parseArgs(argv);
   const mode = args.execute ? 'executed' : 'plan';
   try {
+    if (args.execute && process.env.AGENTEX_CI === '1') {
+      return {
+        code: 2,
+        out: { ok: false, mode, blocked: [{ reason: 'ci-mode', message: 'tracker writes are disabled in CI (AGENTEX_CI=1) — bug filing stays interactive; file this defect from an interactive session' }] },
+      };
+    }
     if (!args.spec) return { code: 2, out: { ok: false, mode, error: { message: '--spec <file.json> is required' } } };
     let spec;
     try { spec = JSON.parse(fs.readFileSync(args.spec, 'utf8')); }
@@ -398,6 +404,6 @@ module.exports = { run };
 if (require.main === module) {
   run(process.argv.slice(2)).then(({ code, out }) => {
     console.log(JSON.stringify(out));
-    process.exit(code);
+    process.exitCode = code;
   });
 }

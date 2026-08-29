@@ -7,8 +7,10 @@ on any request to test, check, or verify this application's behavior.
 
 ## What this gives you
 
-Two roles to play when asked to test something, defined in full in
-`.github/agentex/agents/`:
+Use the browser-testing skill and two agent roles when asked to test something:
+
+- **`.github/agentex/skills/browser-testing/SKILL.md`** — read first for browser setup,
+  evidence, run-directory, and isolated-session rules.
 
 - **`.github/agentex/agents/test-orchestrator.agent.md`** — read this first for any testing
   request. Plans scenarios, resolves the target environment, decides sequential vs. parallel
@@ -43,5 +45,6 @@ is the default) before opening a browser.
 
 ---
 Vendored by `npx github:mabdel130/agentex-copilot` — re-run it any time to pick up updates to
-`.github/agentex/agents/` and `.github/agentex/ai-docs/` (it never overwrites this file or your
-config once they exist, so your own edits are safe).
+`.github/agentex/agents/`, `.github/agentex/skills/browser-testing/`, and
+`.github/agentex/ai-docs/` (it never overwrites this file or your config once they exist, so
+your own edits are safe).

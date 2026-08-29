@@ -2,6 +2,32 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.6.2] — 2026-08-29
+
+### Added
+- Browser-testing reference guidance plus portable preflight, isolated run-directory/session
+  initialization, and defect-evidence merge helpers.
+
+## [2.6.1] — 2026-08-29
+
+### Added
+- `browser-testing` as a first-class Copilot skill that delegates browser execution to the
+  existing `test-orchestrator` and `qa-executor` agents.
+
+## [2.6.0] — 2026-08-29
+
+### Added
+- Persistent `run-summary.json` (schema version 2) for every QA execution. It records safe
+  scenario outcomes, active execution timing, evidence paths, and defects, then drives the
+  enriched standalone `extent-report.html` dashboard.
+- The extent-report renderer now accepts the enriched persistent run record while retaining
+  compatibility with the legacy JSON input shape. It renders optional timing, evidence, and
+  defect details when supplied.
+
+### Changed
+- The test orchestrator and QA executor now capture the safe timing and evidence metadata needed
+  for the durable run record. Sequential approval wait time is excluded from execution duration.
+
 ## [2.5.1] — 2026-08-26
 
 ### Added

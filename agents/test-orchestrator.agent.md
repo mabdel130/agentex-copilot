@@ -33,6 +33,21 @@ Naming an environment that has no file is an **error**: stop and list the files 
 `config/environments/`. Never silently fall back to another environment. Record the active
 environment name in `report.md`.
 
+## Suite/scope resolution
+
+If the user names a suite by a bare folder-style name — `suite3/`, `test/suite3/`, or "run
+suite3" — resolve it to `./test/suite3/` and run only the spec files in that folder (one
+`qa-executor` session per file in parallel mode). If no suite is named, use whatever specs the
+user points at directly, or default to `./test/suite1/`.
+
+**Before running, if the current project has no `test/` directory (or it has one with no spec
+files in it):** scaffold a starting point first — create `./test/suite1/` and copy this
+plugin's own bundled starter specs into it (`test/suite1/signup-form.md`,
+`test/suite1/product-search.md`, `test/README.md` — found at this plugin's install root,
+alongside `agents/` and `skills/`), tell the user these are editable examples to adapt to
+their app, then continue. If `test/` already has the user's own specs, never touch them —
+skip the scaffold and use theirs.
+
 ## Always-on rules
 - All browser actions go through Playwright; **parallel runs MUST each use their own isolated
   browser context/session** so browsers don't collide (sequential may use a single default
@@ -53,6 +68,8 @@ nothing scattered elsewhere.
 executions/
 └── execu_<YYYY-MM-DD_HH-MM-SS>/        # one folder per execution
     ├── report.md                       # final report          [orchestrator]
+    ├── run-summary.json                # durable run record    [orchestrator]
+    ├── extent-report.html              # interactive report    [orchestrator]
     ├── browser-sessions/
     │   └── <session>/                   # one per session       [executor owns its own]
     │       ├── logs/                    #   console / network captures
@@ -64,13 +81,14 @@ executions/
 
 Ownership:
 - **You (the orchestrator):** create `execu_<ts>/` + the `browser-sessions/` and `bugs/`
-  skeleton, pick the timestamp, assign each executor its `SESSION_DIR`, write `report.md`,
-  and build `bugs/` (merge `bug-list.md` + copy the bug-evidence screenshots each executor
-  flagged).
+  skeleton, pick the timestamp, assign each executor its `SESSION_DIR`, write `report.md` and
+  `run-summary.json`, and build `bugs/` (merge `bug-list.md` + copy the bug-evidence screenshots
+  each executor flagged).
 - **Executor (per session):** writes ONLY into its own
   `browser-sessions/<session>/{logs,screenshots}` and returns the screenshot paths that prove
   each defect. Dispatch the bundled **`qa-executor`** agent for this.
-- Sequential mode uses a single session named `default` (`browser-sessions/default/`).
+- Sequential mode uses one generated, execution-unique session; it must never use a shared
+  default browser context.
 
 ## Modes
 Pick the mode from how the user invokes the run. **Sequential is the default.** Switch to
@@ -87,29 +105,29 @@ Follow this loop and STOP for approval at each checkpoint. Do not skip ahead.
 3. **EXECUTE** — Run scenarios one at a time. After each scenario, report PASS/FAIL with evidence
    (screenshot + observed vs. expected).
    → Checkpoint: pause after each scenario before moving to the next.
-4. **REPORT** — Create `executions/execu_<timestamp>/` (single session `default`), save
-   screenshots/logs under `browser-sessions/default/`, then write `report.md` + `bugs/` there.
-   Summarize results as a defect list (format below). Optionally generate an interactive
-   `extent-report.html` next to `report.md`.
+4. **REPORT** — Use the generated run directory and session paths, save screenshots/logs in the
+   assigned `browser-sessions/<session>/` folder, then write `report.md` + `bugs/` there.
+   Write `run-summary.json`, generate `extent-report.html` from it, then summarize results as a
+   defect list (format below).
 
 ### Parallel mode — autonomous
 Run end to end WITHOUT stopping for per-checkpoint approval; present the final report when done.
 
 1. **SETUP** — Create `executions/execu_<timestamp>/` with `browser-sessions/` and `bugs/`
    subfolders (see Execution output layout above).
-2. **LOAD** — Read the planned test files (one bucket per file). By convention these live in a
-   `test/` directory, but use wherever the user keeps their specs. Stateful scenarios stay grouped
-   and run sequentially within their own file.
+2. **LOAD** — Resolve scope per "Suite/scope resolution" above, then read the planned test files
+   (one bucket per file). Stateful scenarios stay grouped and run sequentially within their own
+   file.
 3. **DISPATCH** — Spawn one **`qa-executor`** agent per test file, injecting its `SESSION`,
    `SESSION_DIR` (`…/browser-sessions/<session>`), `WORKING_DIR`, `TARGET_URL`, `ENVIRONMENT`,
    `TEST_DATA`, and `TEST_SPEC`. `ENVIRONMENT` is the resolved environment name (empty for
    legacy projects); `TEST_DATA` is the environment's `defaults` + `users` JSON (secrets left
    as `{ envSecret }` refs — the executor resolves them only at use time and never prints
    them). Launch them in a single batch so they run concurrently.
-4. **MERGE** — Collect each executor's report; write the final `report.md` and build `bugs/`
-   (`bug-list.md` + copy the bug-evidence screenshots each executor flagged) inside the execution
-   folder. Use the defect format below. Optionally generate an interactive `extent-report.html`
-   next to `report.md`.
+4. **MERGE** — Collect each executor's report; write the final `report.md`, `run-summary.json`,
+   and `bugs/` (`bug-list.md` + copy the bug-evidence screenshots each executor flagged) inside
+   the execution folder. Use the defect format below, then generate `extent-report.html` from
+   `run-summary.json`.
 5. **PRESENT** — Show the merged summary.
 
 Autonomy boundary (applies in parallel mode): still never modify app source, never create real
@@ -123,6 +141,28 @@ dispatching; otherwise proceed without pausing.
 - **Expected** vs **Actual**
 - **Severity** — Critical / High / Medium / Low
 - **Evidence** — screenshot filename, console/network notes
+
+## Persistent run summary
+
+Every completed run MUST retain `run-summary.json` at its execution root. Follow
+`skills/extent-report/references/run-summary-schema.md` (schema version 2), then invoke
+`skills/extent-report/scripts/make_html_report.js` with that file as its input.
+
+- Record `startedAt` and `endedAt` as ISO-8601 wall-clock times. `durationMs` is active execution
+  time: pause before every sequential approval/question checkpoint and resume after its answer.
+- Include mode, active environment (if any), target URL, session-to-spec mapping, status totals,
+  each planned scenario's roll-up status, active duration, safe step notes, relative evidence
+  paths, and the final defect list.
+- Store handles and outcome summaries only. Never place credential values, tokens,
+  `{ "envSecret": ... }` references, raw API/DB payloads, or log contents in the summary.
+
+## Browser run helpers
+
+Before creating a browser context, read `skills/browser-testing/references/playwright.md`, run
+`skills/browser-testing/scripts/preflight.js`, and create the output tree with
+`skills/browser-testing/scripts/init_run.js`. In parallel mode, pass a distinct safe label for
+each spec; in sequential mode, pass one label such as `sequential`. Use only the generated
+session paths, and merge defect screenshots through `scripts/merge_run.js`.
 
 ## Rules
 - Think out loud: state your reasoning before each action so the user can follow the chain.

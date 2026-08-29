@@ -35,8 +35,15 @@ Run a parallel regression against https://example.com from the specs in test/sui
 ```
 
 Every run writes to a timestamped `executions/execu_<timestamp>/` folder: `report.md`, an
-interactive `extent-report.html` dashboard, per-session logs/screenshots, and a merged
+interactive `extent-report.html` dashboard, persistent `run-summary.json`, per-session
+logs/screenshots, and a merged
 `bugs/bug-list.md`.
+
+## Browser-testing skill
+
+[`skills/browser-testing/SKILL.md`](./skills/browser-testing/SKILL.md) is the entry point for
+browser requests. Its `references/playwright.md` defines browser and evidence rules; its helper
+scripts preflight Playwright, create isolated run/session paths, and merge defect evidence.
 
 ## Non-negotiable rules for every agent in this plugin
 

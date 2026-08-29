@@ -58,11 +58,33 @@ ensureFile(
 );
 ensureFile(path.join(targetRoot, '.env'), path.join(pluginRoot, '.env.example'));
 
-if (!fs.existsSync(path.join(targetRoot, 'test'))) {
-  fs.mkdirSync(path.join(targetRoot, 'test'), { recursive: true });
-  created.push('test/ (empty — add your spec files here)');
+// integration/ catalog — the ONLY api:/db: entries an agent may ever execute. Samples come
+// from the skills that own each format; never overwritten if the user already has their own.
+ensureFile(
+  path.join(targetRoot, 'integration', 'sample_api.json'),
+  path.join(pluginRoot, 'skills', 'api-integration', 'templates', 'sample_api.json')
+);
+ensureFile(
+  path.join(targetRoot, 'integration', 'sample_db.json'),
+  path.join(pluginRoot, 'skills', 'db-integration', 'templates', 'sample_db.json')
+);
+
+// test/ specs — only seed the bundled samples when the user has no specs of their own yet.
+// An existing test/ with any content (their own specs) is left completely untouched.
+const testDir = path.join(targetRoot, 'test');
+const testHasContent = fs.existsSync(testDir) && fs.readdirSync(testDir).length > 0;
+if (!testHasContent) {
+  ensureFile(path.join(testDir, 'README.md'), path.join(pluginRoot, 'test', 'README.md'));
+  ensureFile(
+    path.join(testDir, 'suite1', 'signup-form.md'),
+    path.join(pluginRoot, 'test', 'suite1', 'signup-form.md')
+  );
+  ensureFile(
+    path.join(testDir, 'suite1', 'product-search.md'),
+    path.join(pluginRoot, 'test', 'suite1', 'product-search.md')
+  );
 } else {
-  skipped.push('test/');
+  skippedNoSuffix.push('test/ (already has your own specs — left untouched)');
 }
 
 appendGitignore(['.env', '.env.*', '!.env.example', 'executions/*', '!executions/README.md', 'test/.auth/']);

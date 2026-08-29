@@ -80,6 +80,8 @@ everything lands in a new timestamped folder:
 ```
 executions/execu_<timestamp>/
 ├── report.md              # the final summary — what passed, what failed
+├── run-summary.json       # durable input for the interactive report
+├── extent-report.html     # interactive execution dashboard
 ├── bugs/bug-list.md       # a merged list of every defect found
 └── ...                    # screenshots and logs backing up every result
 ```
@@ -89,7 +91,8 @@ executions/execu_<timestamp>/
 - Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
 - Browser driver: `npm install -D @playwright/test && npx playwright install chromium`
 - Scaffold: ask Copilot "Set up AgenTeX for this project" (see step 3 above)
-- Run: describe what to test, in plain language
+- Run: describe what to test in plain language; the `browser-testing` skill delegates the run
+  to the test-orchestrator agent
 
 ## Next steps
 
