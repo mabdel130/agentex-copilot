@@ -1,8 +1,10 @@
+
 name: Check AgenTeX upstream updates
 
 on:
   schedule:
     - cron: "17 8 * * 1"
+    - cron: "17 8 * * 4"
   workflow_dispatch:
 
 permissions:

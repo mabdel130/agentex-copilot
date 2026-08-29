@@ -5,13 +5,13 @@
 copy upstream files: upstream uses Claude Code-specific agents and command wrappers, while this
 project uses GitHub Copilot agents, skills, and plugin metadata.
 
-The repository therefore uses a **weekly notification workflow**, not an automated code sync.
+The repository therefore uses a **twice-weekly notification workflow**, not an automated code sync.
 
 ## How monitoring works
 
 [`.github/workflows/upstream-sync-notifier.yml`](../.github/workflows/upstream-sync-notifier.yml)
-runs every Monday and can also be started from the Actions tab with **Run workflow**. It fetches
-`MhmdElGazzar/agentex` `main` and checks for changes beneath:
+runs every Monday and Thursday at 08:17 UTC and can also be started from the Actions tab with
+**Run workflow**. It fetches `MhmdElGazzar/agentex` `main` and checks for changes beneath:
 
 ```text
 agents/
