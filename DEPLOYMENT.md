@@ -146,9 +146,8 @@ Either way, then edit:
 ### 7. Grant tool permissions
 
 Copilot agent mode needs permission to run a terminal (for Playwright / `sqlcmd` / `curl`) and
-read/write files under `executions/`. Both agent files here deliberately omit a `tools:`
-restriction in frontmatter — per GitHub's docs, that means "all available tools," which is what
-browser-driven testing needs. Configure your Copilot tool-approval settings to allow Playwright
+read/write files under `executions/`. Both agent files explicitly declare `tools: [write]` for
+their test-artifact output. Configure your Copilot tool-approval settings to allow Playwright
 commands outright, and deny reads of `.env` and any destructive terminal commands.
 
 ### 8. Run your first test

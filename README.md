@@ -167,9 +167,8 @@ Two roles, defined as plain markdown agent files:
 | **`test-orchestrator`** | [`agents/test-orchestrator.agent.md`](./agents/test-orchestrator.agent.md) | The one you talk to. Resolves the target environment, plans scenarios, picks sequential vs. parallel mode, dispatches executors, merges the final report. |
 | **`qa-executor`** | [`agents/qa-executor.agent.md`](./agents/qa-executor.agent.md) | Runs exactly one test spec to completion in its own isolated browser session. Dispatched by the orchestrator, never invoked directly. |
 
-Neither file restricts its `tools:` frontmatter — per GitHub's own docs, omitting that field
-gives an agent access to everything (shell, file read/write, search), which is exactly what
-browser-driven testing needs.
+Both files explicitly declare the `write` tool so their test-artifact responsibilities are
+visible in the agent configuration.
 
 **Sequential mode** (the default) — human-in-the-loop, pauses after each scenario for your
 review. Best for exploratory testing and new features.
