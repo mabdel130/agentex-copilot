@@ -412,6 +412,7 @@ Read the full [security policy](./docs/ai/security-policy.md) and
 - [Getting started](./docs/getting-started.md) — condensed first-run walkthrough
 - [Deployment guide](./DEPLOYMENT.md) — plugin installation, fallback setup, permissions, and CI notes
 - [Implementation guide](./docs/IMPLEMENTATION_GUIDE.md) — multi-environment project setup
+- [Upstream synchronization](./docs/UPSTREAM_SYNC.md) — weekly upstream change notifications and porting workflow
 - [QA capability reference](./skills/README.md) — all bundled skills and their triggers
 - [Architecture](./docs/ai/architecture.md) — orchestrator/executor workflow
 - [Security policy](./docs/ai/security-policy.md) — data, secrets, API, and database rules

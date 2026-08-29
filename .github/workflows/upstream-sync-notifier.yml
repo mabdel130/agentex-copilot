@@ -1,0 +1,196 @@
+name: Check AgenTeX upstream updates
+
+on:
+  schedule:
+    - cron: "17 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch AgenTeX upstream
+        id: upstream
+        shell: bash
+        run: |
+          git remote add agentex-upstream https://github.com/MhmdElGazzar/agentex.git
+          git fetch --no-tags agentex-upstream main
+          echo "sha=$(git rev-parse agentex-upstream/main)" >> "$GITHUB_OUTPUT"
+
+      - name: Read sync state
+        id: state
+        uses: actions/github-script@v7
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        with:
+          script: |
+            const label = "agentex-upstream-sync";
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label,
+              });
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: label,
+                color: "1d76db",
+                description: "Tracks AgenTeX upstream synchronization reviews",
+              });
+            }
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "all",
+              labels: label,
+              per_page: 100,
+            });
+
+            const marker = (issue, name) =>
+              issue.body?.match(new RegExp(`<!-- ${name}: ([0-9a-f]{40}) -->`))?.[1];
+            const tracker = issues
+              .filter((issue) => !issue.pull_request)
+              .sort((left, right) => new Date(right.created_at) - new Date(left.created_at))[0];
+
+            if (!tracker) {
+              const body = [
+                "AgenTeX upstream monitoring was initialized.",
+                "",
+                `<!-- agentex-upstream-baseline: ${process.env.UPSTREAM_SHA} -->`,
+                `<!-- agentex-upstream-head: ${process.env.UPSTREAM_SHA} -->`,
+              ].join("\n");
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: "[AgenTeX Sync] Upstream monitoring baseline",
+                body,
+                labels: [label],
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: created.data.number,
+                state: "closed",
+              });
+              core.setOutput("baseline", process.env.UPSTREAM_SHA);
+              core.setOutput("issue-number", "");
+              core.info("Initialized the upstream baseline.");
+              return;
+            }
+
+            const baseline = tracker.state === "open"
+              ? marker(tracker, "agentex-upstream-baseline")
+              : marker(tracker, "agentex-upstream-head");
+            if (!baseline) {
+              core.setFailed(`Tracker issue #${tracker.number} has no valid sync marker.`);
+              return;
+            }
+
+            core.setOutput("baseline", baseline);
+            core.setOutput("issue-number", tracker.state === "open" ? tracker.number : "");
+
+      - name: Identify relevant changes
+        id: changes
+        shell: bash
+        env:
+          BASELINE: ${{ steps.state.outputs.baseline }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        run: |
+          : > upstream-changes.md
+          if [[ "$BASELINE" == "$UPSTREAM_SHA" ]]; then
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "$BASELINE" "$UPSTREAM_SHA"; then
+            {
+              echo "## Manual review required"
+              echo
+              echo "The recorded upstream commit is not an ancestor of the current upstream head."
+              echo "Review the upstream history before porting changes."
+            } > upstream-changes.md
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git diff --quiet "$BASELINE" "$UPSTREAM_SHA" -- \
+            agents/ commands/ skills/ templates/ scripts/ docs/; then
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "## Relevant upstream commits"
+            echo
+            echo '```text'
+            git log --format='%h %s' "$BASELINE..$UPSTREAM_SHA"
+            echo '```'
+            echo
+            echo "## Changed paths"
+            echo
+            echo '```text'
+            git diff --name-status "$BASELINE" "$UPSTREAM_SHA" -- \
+              agents/ commands/ skills/ templates/ scripts/ docs/
+            echo '```'
+          } > upstream-changes.md
+          echo "relevant=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create or refresh review issue
+        if: steps.changes.outputs.relevant == 'true'
+        uses: actions/github-script@v7
+        env:
+          BASELINE: ${{ steps.state.outputs.baseline }}
+          ISSUE_NUMBER: ${{ steps.state.outputs.issue-number }}
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+        with:
+          script: |
+            const fs = require("fs");
+            const label = "agentex-upstream-sync";
+            const changes = fs.readFileSync("upstream-changes.md", "utf8");
+            const body = [
+              "Upstream AgenTeX has relevant changes that need a Copilot-specific review and port.",
+              "",
+              "This notifier does not copy upstream files automatically because AgenTeX and this",
+              "repository use different agent and command formats. Review each change, adapt it",
+              "for Copilot, and close this issue only after the changes have been reflected here.",
+              "",
+              `Upstream compare: https://github.com/MhmdElGazzar/agentex/compare/${process.env.BASELINE}...${process.env.UPSTREAM_SHA}`,
+              "",
+              changes,
+              "",
+              `<!-- agentex-upstream-baseline: ${process.env.BASELINE} -->`,
+              `<!-- agentex-upstream-head: ${process.env.UPSTREAM_SHA} -->`,
+            ].join("\n");
+
+            const issueNumber = process.env.ISSUE_NUMBER;
+            if (issueNumber) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: Number(issueNumber),
+                title: "[AgenTeX Sync] Review upstream updates",
+                body,
+              });
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: "[AgenTeX Sync] Review upstream updates",
+              body,
+              labels: [label],
+            });
