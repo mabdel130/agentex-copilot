@@ -2,6 +2,25 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.6.4] — 2026-08-30
+
+### Added
+- Playwright Agent CLI-based browser execution with isolated `-s=<session>` sessions.
+- Optional `playwright` project defaults for Chromium/Chrome, Firefox, WebKit, or Edge;
+  headless/headed mode; isolated persistent profiles; and optional HTML dashboards. Clear
+  request-level choices override these defaults.
+
+### Changed
+- Browser preflight now reports Playwright Agent CLI availability and documentation now installs
+  `@playwright/cli` plus the selected browser engine.
+
+## [2.6.3] — 2026-08-30
+
+### Fixed
+- Removed the restrictive `tools: [write]` allowlist from the test orchestrator and QA executor
+  profiles. They now inherit the Copilot runtime's available file, terminal, and browser tools,
+  allowing them to read specs, run Playwright, and write execution artifacts.
+
 ## [2.6.2] — 2026-08-29
 
 ### Added

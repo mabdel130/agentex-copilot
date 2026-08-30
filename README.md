@@ -7,7 +7,7 @@ real browser with Playwright, captures evidence, and creates a consolidated defe
 designed for exploratory testing, feature validation, and regression checks; it does not replace
 your unit or integration test suite.
 
-[![Version](https://img.shields.io/badge/version-2.6.2-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.6.4-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -123,15 +123,15 @@ already present.
 
 Perform the following steps from the **application project**, not from this plugin repository.
 
-### 1. Install Playwright and Chromium
+### 1. Install Playwright Agent CLI and a browser
 
 ```bash
-npm install -D @playwright/test
-npx playwright install chromium
+npm install -D @playwright/cli@latest
+npx playwright-cli install-browser chromium
 ```
 
-Other Playwright browsers can be installed if your test strategy needs them, but Chromium is the
-standard starting point.
+Install only the browser engine you will use: `chromium`, `chrome`, `firefox`, `webkit`, or
+`msedge`. Agent CLI defaults to headless; request `headed` when you need to observe the run.
 
 ### 2. Create AgenTeX configuration
 
@@ -205,12 +205,22 @@ Edit `config/project.json`:
   },
   "login": {
     "mode": "session"
+  },
+  "playwright": {
+    "browser": "chromium",
+    "mode": "headless",
+    "persistent": false,
+    "dashboard": true
   }
 }
 ```
 
 Set `defaultEnvironment` to the filename you will use under `config/environments/`. For example,
 `"dev"` selects `config/environments/dev.json`.
+
+`playwright` is optional. Use it to choose the default browser, headless/headed launch mode,
+isolated persistent profile, and whether to create `extent-report.html`. A request can override
+any setting: for example, “Run the checkout regression headed in Firefox without a dashboard.”
 
 ### 2. Set the URL and disposable test users
 
@@ -337,7 +347,7 @@ Every run creates a timestamped folder:
 executions/execu_2026-08-26_11-00-53/
 ├── report.md
 ├── run-summary.json
-├── extent-report.html
+├── extent-report.html     # present when dashboard is enabled
 ├── browser-sessions/
 │   └── <unique-session>/
 │       ├── screenshots/

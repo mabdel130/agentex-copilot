@@ -53,6 +53,10 @@ Presence column: **required** = required-by-capture (the orchestrator must write
 | `environment` | string | optional | Active environment name; `""`/absent for legacy projects. |
 | `targetUrl` | string | optional | The tested portal URL. |
 | `loginMode` | string | optional | `"session"` \| `"fresh"` — the mode word ONLY (see Secrets). |
+| `browser` | string | optional | Resolved Agent CLI browser: `chromium`, `chrome`, `firefox`, `webkit`, or `msedge`. |
+| `launchMode` | string | optional | `"headless"` \| `"headed"`. |
+| `persistent` | boolean | optional | Whether the session used an isolated persistent profile. |
+| `dashboard` | boolean | optional | Whether this run generated `extent-report.html`. |
 | `sessions` | array | optional | Session→spec map, kept from `init_run.js` output: `{session, spec, label}`. |
 | `tools` | object | optional | The `preflight.js` JSON, verbatim (`{ "<tool>": {"ok": bool, "version": "…"} }`). |
 
@@ -154,7 +158,7 @@ writes the JSON; release-gate runs additionally sweep artifacts via `scan-secret
       { "session": "search-140211-b7e1", "spec": "test/suite1/product-search.md", "label": "search" }
     ],
     "tools": { "node": { "ok": true, "version": "v22.1.0" },
-               "playwright-cli": { "ok": true, "version": "1.2.3" } }
+               "playwrightCli": { "ok": true, "version": "1.2.3" } }
   },
   "summary": { "total": 6, "passed": 3, "failed": 1, "blocked": 0, "flaky": 1,
                "naDescoped": 0, "notRun": 1, "warnings": 0, "viewMismatch": 0 },

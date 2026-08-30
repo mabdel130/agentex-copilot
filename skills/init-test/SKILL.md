@@ -30,7 +30,7 @@ agent judgment — run it, then explain the results and next steps to the user.
 3. The script prints one `[created]` or `[skipped]` line per file. Read its output and relay it
    to the user plainly — don't re-describe it in different words.
 4. After scaffolding, tell the user the concrete next steps, in order:
-   - Install the browser driver: `npm install -D @playwright/test && npx playwright install chromium`
+   - Install Playwright Agent CLI and a browser: `npm install -D @playwright/cli@latest && npx playwright-cli install-browser chromium`
    - Edit `config/environments/dev.json` — at minimum set `portalUrl` to the site under test.
    - Fill in `.env` for any secrets referenced via `{ "envSecret": "NAME" }`.
    - Replace the samples in `integration/` with the project's real API/DB catalog entries (if

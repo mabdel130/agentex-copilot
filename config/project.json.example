@@ -5,5 +5,11 @@
     "baseUrl": "",
     "project": ""
   },
-  "login": { "mode": "session" }
+  "login": { "mode": "session" },
+  "playwright": {
+    "browser": "chromium",
+    "mode": "headless",
+    "persistent": false,
+    "dashboard": true
+  }
 }

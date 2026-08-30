@@ -110,11 +110,11 @@ dependency-free Node script, nothing hidden.
 cd /path/to/your-project
 ```
 
-### 5. Install the browser driver in that project
+### 5. Install Playwright Agent CLI and a browser in that project
 
 ```bash
-npm install -D @playwright/test
-npx playwright install chromium
+npm install -D @playwright/cli@latest
+npx playwright-cli install-browser chromium
 ```
 
 ### 6. Scaffold config
@@ -137,7 +137,8 @@ anything already there.
 **Fallback installer** — this already happened as part of `npx github:mabdel130/agentex-copilot`.
 
 Either way, then edit:
-- `config/project.json` — `defaultEnvironment`, KB settings, login mode.
+- `config/project.json` — `defaultEnvironment`, KB settings, login mode, and optional
+  Playwright defaults (browser, headless/headed mode, persistent profile, dashboard).
 - `config/environments/dev.json` — target `portalUrl`, test `users`, `db`/`api` blocks.
 - `.env` — the actual secret values referenced by `{ "envSecret": "NAME" }` in the JSON files.
 
@@ -146,9 +147,61 @@ Either way, then edit:
 ### 7. Grant tool permissions
 
 Copilot agent mode needs permission to run a terminal (for Playwright / `sqlcmd` / `curl`) and
-read/write files under `executions/`. Both agent files explicitly declare `tools: [write]` for
-their test-artifact output. Configure your Copilot tool-approval settings to allow Playwright
-commands outright, and deny reads of `.env` and any destructive terminal commands.
+read/write files under `executions/`. The AgenTeX agents intentionally omit a `tools` allowlist
+so they inherit these capabilities from the Copilot runtime — Copilot's tool-approval and
+directory-trust prompts are a deliberate security boundary, so nothing in this plugin can grant
+itself these permissions silently; you grant them once, the same way for every plugin.
+
+**Recommended: launch with pre-approved/denied flags.** `--allow-tool` and `--deny-tool` accept
+`Kind(pattern)` values; deny always wins over allow. Copy this once (adjust the `az` lines out if
+you don't use the Azure DevOps skills):
+
+```bash
+copilot \
+  --allow-tool="shell(npx playwright-cli*)" \
+  --allow-tool="shell(node*)" \
+  --allow-tool="shell(npm install*)" \
+  --allow-tool="shell(az --version)" \
+  --allow-tool="shell(az login*)" \
+  --allow-tool="shell(az account*)" \
+  --allow-tool="shell(az group list*)" \
+  --allow-tool="shell(az resource list*)" \
+  --allow-tool="shell(az webapp list*)" \
+  --allow-tool="shell(az webapp show*)" \
+  --allow-tool="shell(az webapp log*)" \
+  --allow-tool="shell(az storage account list*)" \
+  --allow-tool="shell(az storage blob list*)" \
+  --allow-tool="shell(az keyvault list*)" \
+  --allow-tool="shell(az keyvault secret list*)" \
+  --allow-tool="shell(az aks list*)" \
+  --deny-tool="shell(rm -rf*)" \
+  --deny-tool="shell(rm -fr*)" \
+  --deny-tool="shell(rm -r*)" \
+  --deny-tool="shell(Remove-Item*)" \
+  --deny-tool="shell(rmdir*)" \
+  --deny-tool="shell(git push*)" \
+  --deny-tool="shell(git reset --hard*)" \
+  --deny-tool="shell(git clean*)"
+```
+
+Anything left off both lists (`curl`, `sqlcmd`, `npx playwright-cli close-all`/`kill-all`,
+`az webapp deploy`, `az storage blob upload`, `az aks get-credentials`, `az group create`) still
+prompts each time — that's intentional, they're the commands worth a manual look. Wrap the above
+in a shell alias/function so you don't retype it per session.
+
+**Alternative: persist approvals instead of passing flags every time.** Copilot CLI saves
+per-repo tool approvals to `permissions-config.json` (default `~/.copilot/permissions-config.json`,
+keyed by the absolute path of your project's Git root — not something this repo can ship
+pre-filled). [`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json)
+has a ready-to-merge `tool_approvals` block covering the same commands as above; swap in your own
+path and merge it into any existing entry there. This file format has no deny concept for
+commands or writes, so still pass the `--deny-tool` flags above (or answer "deny" rather than
+"don't ask again" at the write prompt when protecting your app's `src/`) — it only saves you from
+re-approving the *allow* side every session.
+
+Either way, `.env`, keys/certs, and anything under `test/.auth/` should never need to be read by
+the agent — if a session prompts to read one, say no; that would indicate a bug in a step, not
+a legitimate need.
 
 ### 8. Run your first test
 
@@ -170,7 +223,7 @@ Every run writes to `executions/execu_<timestamp>/`:
 executions/execu_<timestamp>/
 ├── report.md              # the final summary
 ├── run-summary.json       # durable machine-readable run record
-├── extent-report.html     # interactive dashboard
+├── extent-report.html     # interactive dashboard, when enabled
 ├── bugs/bug-list.md       # merged defect list
 └── ...                    # screenshots and logs per session
 ```
@@ -216,5 +269,6 @@ otherwise — AgenTeX reports defects, it does not gate merges by default.
 | `copilot plugin install` fails to find the repo | Repo is private, or `copilot` isn't authenticated to GitHub | Confirm `copilot` is logged in and has access; `mabdel130/agentex-copilot` is public. |
 | Copilot Chat doesn't seem to know about AgenTeX (fallback path) | `.github/copilot-instructions.md` missing or not committed | Confirm the file exists at that exact path and is tracked by git. |
 | "environment has no file" | `defaultEnvironment` or requested env doesn't match a file in `config/environments/` | Create the matching `<env>.json` or fix the name — never falls back silently. |
+| Agent says it cannot access the filesystem, shell, or browser | The agent profile was installed with a restrictive `tools:` allowlist, or the runtime withheld the required capabilities | Update AgenTeX, then start a new Copilot session. Agent profiles must omit `tools:` so they inherit the runtime's file, terminal, and browser capabilities; allow Playwright when prompted. |
 | Secrets appearing in logs | A step tried to print an `envSecret` value directly | This is a bug — file an issue; agents must resolve secrets only at point of use. |
 | Browser session collisions in parallel mode | Two sessions sharing the same session id | Each spec file must get its own session id from the orchestrator. |

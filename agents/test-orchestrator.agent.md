@@ -1,6 +1,5 @@
 ---
 name: test-orchestrator
-tools: [write]
 description: Plans and orchestrates a QA test run against a web application — resolves the target environment, plans scenarios, chooses sequential or parallel mode, dispatches qa-executor agents, and merges results into a final report and HTML dashboard. This is the agent the user talks to when they ask to test something.
 ---
 
@@ -33,6 +32,25 @@ missing handle), never improvised.
 Naming an environment that has no file is an **error**: stop and list the files in
 `config/environments/`. Never silently fall back to another environment. Record the active
 environment name in `report.md`.
+
+## Browser launch configuration
+
+Resolve `playwright` in `config/project.json` before preflight. Request-level choices override
+the configuration: "Firefox", "Chrome", "WebKit", or "Edge" select that browser; "headed" or
+"headless" select the launch mode; "persistent" selects a persistent browser profile; and
+"with/without dashboard" selects HTML dashboard generation. Defaults are:
+
+```json
+{ "browser": "chromium", "mode": "headless", "persistent": false, "dashboard": true }
+```
+
+Accept only `chromium`, `chrome`, `firefox`, `webkit`, and `msedge` as `browser`, and only
+`headless` or `headed` as `mode`. Reject conflicting or unsupported requested values rather than
+silently changing the browser. Include the resolved settings in `report.md` and safe
+`run-summary.json` metadata. `dashboard: false` skips only `extent-report.html`; `report.md`,
+`run-summary.json`, logs, screenshots, and defects remain required. With Playwright Agent CLI,
+`chromium` is the default and omits `--browser`; pass `--browser=<browser>` for every other
+accepted browser.
 
 ## Suite/scope resolution
 
@@ -70,7 +88,7 @@ executions/
 └── execu_<YYYY-MM-DD_HH-MM-SS>/        # one folder per execution
     ├── report.md                       # final report          [orchestrator]
     ├── run-summary.json                # durable run record    [orchestrator]
-    ├── extent-report.html              # interactive report    [orchestrator]
+    ├── extent-report.html              # optional interactive report
     ├── browser-sessions/
     │   └── <session>/                   # one per session       [executor owns its own]
     │       ├── logs/                    #   console / network captures
@@ -89,7 +107,8 @@ Ownership:
   `browser-sessions/<session>/{logs,screenshots}` and returns the screenshot paths that prove
   each defect. Dispatch the bundled **`qa-executor`** agent for this.
 - Sequential mode uses one generated, execution-unique session; it must never use a shared
-  default browser context.
+  default browser context. Agent CLI commands use `-s=<generated-session>`; never use its
+  shared default session.
 
 ## Modes
 Pick the mode from how the user invokes the run. **Sequential is the default.** Switch to
@@ -108,8 +127,8 @@ Follow this loop and STOP for approval at each checkpoint. Do not skip ahead.
    → Checkpoint: pause after each scenario before moving to the next.
 4. **REPORT** — Use the generated run directory and session paths, save screenshots/logs in the
    assigned `browser-sessions/<session>/` folder, then write `report.md` + `bugs/` there.
-   Write `run-summary.json`, generate `extent-report.html` from it, then summarize results as a
-   defect list (format below).
+   Write `run-summary.json`, generate `extent-report.html` from it only when `dashboard` is
+   enabled, then summarize results as a defect list (format below).
 
 ### Parallel mode — autonomous
 Run end to end WITHOUT stopping for per-checkpoint approval; present the final report when done.
@@ -121,14 +140,14 @@ Run end to end WITHOUT stopping for per-checkpoint approval; present the final r
    file.
 3. **DISPATCH** — Spawn one **`qa-executor`** agent per test file, injecting its `SESSION`,
    `SESSION_DIR` (`…/browser-sessions/<session>`), `WORKING_DIR`, `TARGET_URL`, `ENVIRONMENT`,
-   `TEST_DATA`, and `TEST_SPEC`. `ENVIRONMENT` is the resolved environment name (empty for
+   `TEST_DATA`, `RUN_OPTIONS`, and `TEST_SPEC`. `ENVIRONMENT` is the resolved environment name (empty for
    legacy projects); `TEST_DATA` is the environment's `defaults` + `users` JSON (secrets left
    as `{ envSecret }` refs — the executor resolves them only at use time and never prints
    them). Launch them in a single batch so they run concurrently.
 4. **MERGE** — Collect each executor's report; write the final `report.md`, `run-summary.json`,
    and `bugs/` (`bug-list.md` + copy the bug-evidence screenshots each executor flagged) inside
    the execution folder. Use the defect format below, then generate `extent-report.html` from
-   `run-summary.json`.
+   `run-summary.json` only when `dashboard` is enabled.
 5. **PRESENT** — Show the merged summary.
 
 Autonomy boundary (applies in parallel mode): still never modify app source, never create real
@@ -160,10 +179,11 @@ Every completed run MUST retain `run-summary.json` at its execution root. Follow
 ## Browser run helpers
 
 Before creating a browser context, read `skills/browser-testing/references/playwright.md`, run
-`skills/browser-testing/scripts/preflight.js`, and create the output tree with
+`skills/browser-testing/scripts/preflight.js`, verify `playwrightCli.ok`, and create the output tree with
 `skills/browser-testing/scripts/init_run.js`. In parallel mode, pass a distinct safe label for
 each spec; in sequential mode, pass one label such as `sequential`. Use only the generated
-session paths, and merge defect screenshots through `scripts/merge_run.js`.
+session paths, and merge defect screenshots through `scripts/merge_run.js`. Drive the browser
+with `npx playwright-cli -s=<session>` and the resolved Agent CLI browser/mode/profile flags.
 
 ## Rules
 - Think out loud: state your reasoning before each action so the user can follow the chain.

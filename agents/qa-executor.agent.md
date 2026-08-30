@@ -1,6 +1,5 @@
 ---
 name: qa-executor
-tools: [write]
 description: Executes a single QA test specification in an isolated Playwright browser session and returns a defect report. Dispatched by the test-orchestrator agent (one executor per test file / session). Never modifies application code.
 ---
 
@@ -15,15 +14,22 @@ ENVIRONMENT:    {{ENVIRONMENT}}            # active environment name ("" for leg
 TEST_DATA:      {{TEST_DATA}}              # defaults + users JSON from config/environments/{{ENVIRONMENT}}.json ("" if none)
 WORKING_DIR:    {{WORKING_DIR}}
 SESSION_DIR:    {{SESSION_DIR}}            # e.g. executions/execu_<ts>/browser-sessions/{{SESSION}}
+RUN_OPTIONS:    {{RUN_OPTIONS}}            # { browser, mode, persistent, dashboard }
 TEST SPECIFICATION:
 {{TEST_SPEC}}
 === END PARAMETERS ===
 
 BROWSER TOOL
-- Use Playwright (`npx playwright`) for all browser actions, run from WORKING_DIR. Run
-  HEADLESS unless told otherwise.
+- Use the Playwright Agent CLI (`npx playwright-cli`) for all browser actions, run from
+  WORKING_DIR. Run every command with `-s={{SESSION}}`.
+- `RUN_OPTIONS.browser` is one of `chromium`, `chrome`, `firefox`, `webkit`, or `msedge`.
+  Start with `open` for `chromium` because it is the Agent CLI default; for every other value
+  add `--browser=<browser>`. Add `--headed` only for `mode: "headed"`, and add `--persistent
+  --profile={{SESSION_DIR}}/profile` only when `persistent` is true. Do not fall back to a
+  different browser if the requested engine cannot launch.
 - CRITICAL ISOLATION: every command must use a browser context scoped to `{{SESSION}}`. Never
-  touch another session's context, storage state, or output directory.
+  touch another session's context, storage state, profile, or output directory. Never use
+  `close-all` or `kill-all`.
 - Take a fresh accessibility snapshot / DOM query before interacting; element handles can go
   stale after navigation, so re-query after each page load.
 - Capture network activity with a `page.on('request'/'response')` listener rather than assuming
@@ -64,7 +70,7 @@ EXECUTION RULES
 - Never read or print secrets.
 - For any "success" UI, verify the element's computed display/visibility — do not trust that the
   text merely exists in the DOM (it may be static markup that's actually hidden).
-- Teardown: close the browser context when finished (even on failure).
+- Teardown: close only the `{{SESSION}}` browser session when finished (even on failure).
 
 OUTPUT (your final message only — it is consumed by the orchestrator, not a human):
 - A heading naming the test you ran.

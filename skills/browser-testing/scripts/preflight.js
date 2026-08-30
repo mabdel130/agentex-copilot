@@ -27,11 +27,19 @@ function probePlaywright() {
   return probe('npx', ['playwright', '--version']);
 }
 
-module.exports = { probe, probePlaywright };
+function probePlaywrightCli() {
+  if (process.platform === 'win32') {
+    return probe(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', 'npx --no-install playwright-cli --version']);
+  }
+  return probe('npx', ['--no-install', 'playwright-cli', '--version']);
+}
+
+module.exports = { probe, probePlaywright, probePlaywrightCli };
 
 if (require.main === module) {
   console.log(JSON.stringify({
     node: { ok: true, version: process.version },
     playwright: probePlaywright(),
+    playwrightCli: probePlaywrightCli(),
   }));
 }

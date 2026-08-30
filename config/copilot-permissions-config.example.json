@@ -1,0 +1,26 @@
+{
+  "//": "TEMPLATE for the 'commands' approvals AgenTeX needs in Copilot CLI's permissions-config.json (default: ~/.copilot/permissions-config.json — per-user, keyed by absolute path, NOT something this repo can ship pre-filled). Replace <ABSOLUTE-PATH-TO-YOUR-PROJECT> with the Git root Copilot will run from (run `git rev-parse --show-toplevel` there to get it, and use backslash-escaped paths on Windows, e.g. 'C:\\\\src\\\\my-repo'). Merge the tool_approvals array below into any existing entry for that path — do not overwrite one that already exists.",
+  "//limits": "This file format has NO deny concept for commands or writes; anything not listed here simply falls back to an interactive prompt. Destructive-command denial (rm -rf, git push, etc.) and source-tree write protection are NOT expressible here — pass --deny-tool flags at launch instead (see DEPLOYMENT.md, step 7), or choose 'deny' at the interactive prompt rather than 'don't ask again' when Copilot tries a write under your app's source.",
+  "locations": {
+    "<ABSOLUTE-PATH-TO-YOUR-PROJECT>": {
+      "tool_approvals": [
+        { "kind": "commands", "commandIdentifiers": ["npx playwright-cli:*"] },
+        { "kind": "commands", "commandIdentifiers": ["node:*"] },
+        { "kind": "commands", "commandIdentifiers": ["npm install:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az --version"] },
+        { "kind": "commands", "commandIdentifiers": ["az login:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az account:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az group list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az resource list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az webapp list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az webapp show:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az webapp log:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az storage account list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az storage blob list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az keyvault list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az keyvault secret list:*"] },
+        { "kind": "commands", "commandIdentifiers": ["az aks list:*"] }
+      ]
+    }
+  }
+}

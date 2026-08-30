@@ -1,6 +1,6 @@
 ---
 name: browser-testing
-description: Test a website or web application through a real Playwright browser session. Use when the user asks to test a URL, a web page, a user flow, a form, a regression suite, happy paths, edge cases, negative cases, or browser defects. Supports sequential human-approved runs and autonomous parallel regressions with screenshots, logs, a durable run summary, and a consolidated defect report.
+description: Test a website or web application through Playwright Agent CLI browser sessions. Use when the user asks to test a URL, a web page, a user flow, a form, a regression suite, happy paths, edge cases, negative cases, or browser defects. Supports Chromium, Chrome, Firefox, WebKit, and Edge; headless, headed, and persistent launch modes; optional HTML dashboards; sequential human-approved runs; and autonomous parallel regressions.
 ---
 
 # Browser Testing
@@ -30,6 +30,8 @@ execution, evidence collection, defect reporting, and final run artifacts.
 - Before opening a browser, read `references/playwright.md`, run `scripts/preflight.js`, and
   initialize a new run through `scripts/init_run.js`. Use its generated session and evidence
   paths rather than constructing shared paths manually.
+- Resolve the optional `playwright` configuration in `config/project.json`. A clear request such
+  as "run headed in Firefox without a dashboard" overrides those defaults.
 
 ## Required behavior
 
@@ -38,6 +40,7 @@ execution, evidence collection, defect reporting, and final run artifacts.
   application source, use disposable test data only, never reveal secrets, and execute API/DB
   work only through cataloged integration entries.
 - Store all execution artifacts beneath `executions/execu_<timestamp>/`, including `report.md`,
-  `run-summary.json`, `extent-report.html`, session logs/screenshots, and consolidated defects.
+  `run-summary.json`, session logs/screenshots, and consolidated defects. Create
+  `extent-report.html` only when the resolved dashboard option is enabled.
 - Do not recreate the orchestration logic in this skill. Read and follow the two agents as the
   authoritative workflow definitions.

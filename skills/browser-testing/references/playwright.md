@@ -4,14 +4,38 @@ Read this reference before driving a browser for an AgenTeX run.
 
 ## Setup and preflight
 
-- Use the project's local Playwright installation: `npx playwright`.
+- Use the [Playwright Agent CLI](https://playwright.dev/agent-cli/introduction) from the
+  project: `npx playwright-cli`. It provides token-efficient accessibility snapshots,
+  deterministic element references, and isolated persistent browser sessions for agents.
 - Before the first run, confirm the tool with
   `node <plugin-root>/skills/browser-testing/scripts/preflight.js`.
-- If the result reports Playwright unavailable, install the dependency the tested project uses,
-  for example `npm install -D @playwright/test`, then install Chromium with
-  `npx playwright install chromium`.
-- Run headless for parallel regression work. Use headed mode only when the user asks to observe
-  the browser.
+- If `playwrightCli.ok` is false, install it locally with
+  `npm install -D @playwright/cli@latest`. Install the engine selected for the run with
+  `npx playwright-cli install-browser <browser>`.
+
+## Run configuration
+
+Resolve the `playwright` object in `config/project.json` before launching. A clear request such
+as "run headed in Firefox without a dashboard" overrides the corresponding default. Defaults are
+`chromium`, headless, non-persistent, and dashboard enabled.
+
+| Setting | Accepted values | Agent CLI launch behavior |
+|---|---|---|
+| `browser` | `chromium`, `chrome`, `firefox`, `webkit`, `msedge` | `chromium` omits `--browser`; every other value uses `open --browser=<browser>` |
+| `mode` | `headless`, `headed` | add `--headed` only for `headed` |
+| `persistent` | `true`, `false` | add `--persistent --profile=<session-dir>/profile` when true |
+| `dashboard` | `true`, `false` | generate `extent-report.html` only when true |
+
+Use the execution-unique session from `init_run.js` on every Agent CLI command:
+
+```bash
+npx playwright-cli -s=<session> open <url>
+```
+
+For Chrome, Firefox, WebKit, or Edge, append `--browser=<browser>`. Append `--headed` and/or
+`--persistent --profile=<session-dir>/profile` only when selected.
+Never substitute another browser if the requested engine cannot launch; report the run as
+blocked with the launch error.
 
 ## Execution rules
 
@@ -29,7 +53,8 @@ Read this reference before driving a browser for an AgenTeX run.
 ## Sessions and evidence
 
 - Initialize each run with `scripts/init_run.js`; use only the generated session names and close
-  only the contexts the run created. Never globally close browsers or contexts.
+  only the contexts the run created. Pass the generated name as `-s=<session>` to
+  `playwright-cli`, and never use `close-all` or `kill-all`.
 - Save session evidence under the generated `logs/` and `screenshots/` folders.
 - Use `scripts/merge_run.js --run-dir <run-dir> <evidence-path>...` to copy confirmed defect
   screenshots into `<run-dir>/bugs/screenshots/` without overwriting same-named shots from

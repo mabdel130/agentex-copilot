@@ -31,18 +31,22 @@ Full detail on both paths, and why two paths exist: [DEPLOYMENT.md](../DEPLOYMEN
 If you just want the shortest route to a first run:
 
 1. Install AgenTeX using one path above.
-2. In the project you want to test, run `npm install -D @playwright/test` and `npx playwright install chromium`.
+2. In the project you want to test, run `npm install -D @playwright/cli@latest` and
+   `npx playwright-cli install-browser chromium`.
 3. If you used the CLI install path, ask Copilot: `Set up AgenTeX for this project.`
 4. Ask Copilot: `Test https://example.com — the signup form: happy path plus empty and bad-email cases.`
 
-## 2. Install the browser driver
+## 2. Install Playwright Agent CLI and a browser
 
 In the project you want to test:
 
 ```bash
-npm install -D @playwright/test
-npx playwright install chromium
+npm install -D @playwright/cli@latest
+npx playwright-cli install-browser chromium
 ```
+
+Replace `chromium` with `chrome`, `firefox`, `webkit`, or `msedge` when that is the browser
+you plan to test.
 
 ## 3. Scaffold the project
 
@@ -89,7 +93,7 @@ executions/execu_<timestamp>/
 ## Quick reference
 
 - Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
-- Browser driver: `npm install -D @playwright/test && npx playwright install chromium`
+- Browser driver: `npm install -D @playwright/cli@latest && npx playwright-cli install-browser chromium`
 - Scaffold: ask Copilot "Set up AgenTeX for this project" (see step 3 above)
 - Run: describe what to test in plain language; the `browser-testing` skill delegates the run
   to the test-orchestrator agent
