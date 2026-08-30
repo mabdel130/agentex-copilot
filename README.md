@@ -127,11 +127,11 @@ Perform the following steps from the **application project**, not from this plug
 
 ```bash
 npm install -D @playwright/cli@latest
-npx playwright-cli install-browser chromium
 ```
 
-Install only the browser engine you will use: `chromium`, `chrome`, `firefox`, `webkit`, or
-`msedge`. Agent CLI defaults to headless; request `headed` when you need to observe the run.
+Then install the browser engine you will use with `npx playwright-cli install-browser <browser>`:
+`chromium`, `chrome`, `firefox`, `webkit`, or `msedge`. Agent CLI defaults to headless; request
+`headed` when you need to observe the run.
 
 ### 2. Create AgenTeX configuration
 
