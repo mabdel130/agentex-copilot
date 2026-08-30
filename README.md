@@ -171,11 +171,24 @@ application.
 
 ### 3. Allow the required Copilot tools
 
-When Copilot asks for permission, allow it to:
+Copilot's tool-approval and directory-trust prompts are a deliberate security boundary, so the
+plugin can't grant itself filesystem/shell/browser access — you approve it once per machine. The
+fastest way is to launch with pre-approved/denied flags:
 
-- Run Playwright commands in the application project.
-- Read the non-secret configuration files.
-- Write run artifacts under `executions/`.
+```bash
+copilot \
+  --allow-tool="shell(npx playwright-cli*)" \
+  --allow-tool="shell(node*)" \
+  --allow-tool="shell(npm install*)" \
+  --deny-tool="shell(rm -rf*)" \
+  --deny-tool="shell(git push*)"
+```
+
+See [`DEPLOYMENT.md`](./DEPLOYMENT.md#7-grant-tool-permissions) for the full flag list (including
+the optional Azure DevOps commands) and for
+[`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json),
+a template you can merge into `~/.copilot/permissions-config.json` to persist these approvals
+instead of passing flags every session.
 
 Do not grant blanket access to secrets. In particular, keep `.env` values private and do not
 approve actions that display them in terminal output.
@@ -411,7 +424,7 @@ Read the full [security policy](./docs/ai/security-policy.md) and
 |---|---|
 | Copilot prompts for login | Start `copilot`, run `/login`, and complete the browser authorization flow. |
 | `copilot plugin install` cannot find the repository | Confirm that Copilot CLI is authenticated and that it can access GitHub. |
-| Browser cannot launch | Re-run `npx playwright install chromium` from the application project. |
+| Browser cannot launch | Re-run `npx playwright-cli install-browser chromium` from the application project. |
 | AgenTeX cannot find an environment | Ensure `defaultEnvironment` matches a file in `config/environments/`, or state the environment name explicitly in the request. |
 | Copilot asks what to test | Provide the feature, target environment, test user or role, and desired cases. |
 | A secret appears in a log | Stop the run, rotate the exposed value, and report the issue. Secret values must never be printed. |
