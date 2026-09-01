@@ -1,0 +1,8 @@
+# Metadata for an external evaluation harness. This repository does not bundle a Copilot eval runner.
+name: discipline-ui-check-reference-mode
+tags: [discipline, ui-check]
+runs: 3
+max_turns: 20
+timeout_seconds: 420
+scaffold_script: |
+  node -e "require('fs').cpSync(process.env.CASE_DIR + '/fixture', '.', {recursive:true})"

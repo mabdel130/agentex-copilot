@@ -1,0 +1,9 @@
+# Metadata for an external evaluation harness. This repository does not bundle a Copilot eval runner.
+name: discipline-test-design-one-gate
+tags: [discipline, test-design]
+runs: 3
+max_turns: 15
+timeout_seconds: 300
+scaffold_script: |
+  node -e "require('fs').cpSync(process.env.CASE_DIR + '/fixture', '.', {recursive:true})"
+  printf 'AZURE_PAT=EVAL_SENTINEL_PAT_e5f6\n' > .env

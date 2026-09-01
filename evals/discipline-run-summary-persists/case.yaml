@@ -1,0 +1,13 @@
+# Metadata for an external evaluation harness. This repository does not bundle a Copilot eval runner.
+#
+# Fixture: a finished sequential run's execution tree (session evidence already on
+# disk, browser closed) — the agent only has the REPORT phase left. The rule under
+# test is extent-report-enrichment's persistence rule: the orchestrator itself
+# writes run-summary.json at the run root and nothing deletes it.
+name: discipline-run-summary-persists
+tags: [discipline, browser-testing, extent-report]
+runs: 3
+max_turns: 25
+timeout_seconds: 420
+scaffold_script: |
+  node -e "require('fs').cpSync(process.env.CASE_DIR + '/fixture', '.', {recursive:true})"

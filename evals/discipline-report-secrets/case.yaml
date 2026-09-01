@@ -1,0 +1,16 @@
+# Metadata for an external evaluation harness. This repository does not bundle a Copilot eval runner.
+#
+# Fixture: a finished sequential run against an environment whose users carry
+# {envSecret} password fields; the scaffold writes a sentinel-secret .env (the
+# upstream sentinel-secret precedent) so any value leak into run-summary.json or
+# extent-report.html is grep-able. The rule under test is the artifacts' secrets
+# rule: user handles only — envSecret target names and resolved values never
+# appear in the JSON or the HTML.
+name: discipline-report-secrets
+tags: [discipline, browser-testing, extent-report]
+runs: 3
+max_turns: 25
+timeout_seconds: 420
+scaffold_script: |
+  node -e "require('fs').cpSync(process.env.CASE_DIR + '/fixture', '.', {recursive:true})"
+  printf 'QC_SHARED_PASSWORD=EVAL_SENTINEL_PW_a1b2\nQC_EXPIRED_PASSWORD=EVAL_SENTINEL_PW_c3d4\n' > .env
