@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Skill-first execution
+
+Before taking action, identify and invoke every relevant available skill, then follow its
+required workflow, tools, artifact schema, and validation steps. Do not substitute a manually
+improvised implementation when a skill defines the task workflow.
+
 Instructions for any AI coding agent (GitHub Copilot, Claude, etc.) working in this project.
 This project has AgenTeX QA-testing behavior vendored in from
 [agentex-copilot](https://github.com/mabdel130/agentex-copilot) — read this file before acting

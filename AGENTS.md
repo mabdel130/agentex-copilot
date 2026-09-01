@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Skill-first execution
+
+Before taking action, identify and invoke every relevant available skill, then follow its
+required workflow, tools, artifact schema, and validation steps. Do not substitute a manually
+improvised implementation when a skill defines the task workflow.
+
 Instructions for GitHub Copilot (and any other AGENTS.md-aware coding agent) working in a
 project that has AgenTeX installed — either as a real Copilot CLI plugin
 (`copilot plugin install mabdel130/agentex-copilot`) or vendored in via the fallback installer
