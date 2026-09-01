@@ -140,13 +140,16 @@ Run end to end WITHOUT stopping for per-checkpoint approval; present the final r
 2. **LOAD** — Resolve scope per "Suite/scope resolution" above, then read the planned test files
    (one bucket per file). Stateful scenarios stay grouped and run sequentially within their own
    file.
-3. **EXECUTE SPECS** — For each test file, follow the **`qa-executor`** role in a distinct
+3. **EXECUTE SPECS** — For repeatable browser-only specs, compile a constrained version-1
+   manifest and invoke `skills/browser-testing/scripts/run_parallel.js` once with bounded
+   workers. It launches one browser process and one isolated context per spec, preserving
+   stateful scenario order when `stateful: true`. The manifest permits only `goto`, `click`,
+   `fill`, `press`, `assertVisible`, and `assertCount`; never include arbitrary JavaScript,
+   API/DB steps, or secrets. Otherwise follow the **`qa-executor`** role in a distinct
    `SESSION`, injecting its `SESSION_DIR` (`…/browser-sessions/<session>`), `WORKING_DIR`,
-   `TARGET_URL`, `ENVIRONMENT`, `TEST_DATA`, `RUN_OPTIONS`, and `TEST_SPEC`. `ENVIRONMENT` is
-   the resolved environment name (empty for legacy projects); `TEST_DATA` is the environment's
-   `defaults` + `users` JSON (secrets left as `{ envSecret }` refs — resolve them only at use
-   time and never print them). Do this in the invoking session. Do not dispatch custom agents
-   that lack browser capability; execution may be serialized while preserving isolated sessions.
+   `TARGET_URL`, `ENVIRONMENT`, `TEST_DATA`, `RUN_OPTIONS`, and `TEST_SPEC`. Do this in the
+   invoking session. Do not dispatch custom agents that lack browser capability; use the
+   Agent CLI fallback only when the spec cannot use the runner.
 4. **MERGE** — Collect each per-spec result; write the final `report.md`, `run-summary.json`,
    and `bugs/` (`bug-list.md` + copy the bug-evidence screenshots each spec flagged) inside
    the execution folder. Use the defect format below, then generate `extent-report.html` from
@@ -182,12 +185,12 @@ Every completed run MUST retain `run-summary.json` at its execution root. Follow
 ## Browser run helpers
 
 Before creating a browser context, read `skills/browser-testing/references/playwright.md`, run
-`skills/browser-testing/scripts/preflight.js`, verify `playwrightCli.ok`, and create the output
-tree with `skills/browser-testing/scripts/init_run.js`. In autonomous mode, pass a distinct safe
-label for each spec; in sequential mode, pass one label such as `sequential`. Use only the
-generated session paths, and merge defect screenshots through `scripts/merge_run.js`. Drive the
-browser from the invoking session with `npx playwright-cli -s=<session>` and the resolved Agent
-CLI browser/mode/profile flags.
+`skills/browser-testing/scripts/preflight.js`, verify Playwright availability, and create the
+output tree with `skills/browser-testing/scripts/init_run.js`. In autonomous mode, pass a
+distinct safe label for each spec; in sequential mode, pass one label such as `sequential`.
+Use only generated session paths and merge defect screenshots through `scripts/merge_run.js`.
+Use `run_parallel.js` for eligible constrained manifests, or drive the fallback browser from the
+invoking session with `npx playwright-cli -s=<session>` and the resolved flags.
 
 ## Rules
 - Think out loud: state your reasoning before each action so the user can follow the chain.

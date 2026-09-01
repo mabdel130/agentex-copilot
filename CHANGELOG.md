@@ -2,6 +2,20 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.6.6] — 2026-09-01
+
+### Added
+- `skills/browser-testing/scripts/run_parallel.js`, an opt-in deterministic runner for
+  repeatable browser-only parallel runs. It uses one browser process with bounded, isolated
+  contexts, constrained manifest validation, per-scenario screenshots, and sanitized
+  console/network metadata.
+- Focused Node tests for the manifest validation boundary.
+
+### Changed
+- Parallel-run guidance now selects the runner when a spec can be expressed with its safe action
+  vocabulary, while retaining the Playwright Agent CLI fallback for exploratory or unsupported
+  flows.
+
 ## [2.6.5] — 2026-09-01
 
 ### Fixed

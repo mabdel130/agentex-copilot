@@ -22,6 +22,10 @@ TEST SPECIFICATION:
 === END PARAMETERS ===
 
 BROWSER TOOL
+- For an autonomous parallel run, the orchestrator may use the constrained
+  `run_parallel.js` manifest runner instead of this per-command Agent CLI procedure. That
+  runner creates one isolated context per spec and returns safe result metadata; it does not
+  permit arbitrary code, API/DB actions, or secrets.
 - Use the Playwright Agent CLI (`npx playwright-cli`) for all browser actions, run from
   WORKING_DIR. Run every command with `-s={{SESSION}}`.
 - `RUN_OPTIONS.browser` is one of `chromium`, `chrome`, `firefox`, `webkit`, or `msedge`.

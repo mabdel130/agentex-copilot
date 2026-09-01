@@ -58,17 +58,20 @@ executions/execu_<YYYY-MM-DD_HH-MM-SS>/
 `config/project.json` may contain an optional `playwright` object. Its defaults are browser
 `chromium`, `mode: "headless"`, `persistent: false`, and `dashboard: true`. The request can
 override these values. Supported browser values are `chromium`, `chrome`, `firefox`, `webkit`,
-and `msedge`; supported modes are `headless` and `headed`. Browser actions use Playwright Agent
-CLI with the execution-unique `-s=<session>` identifier. Chromium uses the CLI default; the
-other browser values pass `--browser=<browser>`. Persistent profiles live under that session's
-artifact folder. Disabling the dashboard omits only `extent-report.html`.
+and `msedge`; supported modes are `headless` and `headed`. Browser actions normally use
+Playwright Agent CLI with the execution-unique `-s=<session>` identifier. Repeatable
+browser-only parallel specs may instead use `skills/browser-testing/scripts/run_parallel.js`:
+one browser process hosts isolated contexts for bounded concurrent specs, reducing process and
+agent-tool overhead. The runner accepts only a constrained manifest, preserves the same evidence
+layout, and is never used for secret, API/DB, or arbitrary-code steps. Persistent profiles live
+under the session's artifact folder. Disabling the dashboard omits only `extent-report.html`.
 
 ## Modes
 
 | Mode | Trigger | Behavior |
 |---|---|---|
 | **Sequential** (default) | Any request that doesn't ask for parallel/regression/autonomous | The invoking session drives the browser, pausing for approval at UNDERSTAND → PLAN → EXECUTE (per scenario) → REPORT checkpoints. |
-| **Parallel** | Explicit ask for parallel / fast / regression / autonomous | The invoking session uses one isolated session per spec and runs autonomously without checkpoints. It may serialize the specs when custom-agent runtimes lack browser capabilities. |
+| **Parallel** | Explicit ask for parallel / fast / regression / autonomous | The invoking session uses one isolated session/context per spec and runs autonomously without checkpoints. Repeatable browser-only manifests use bounded concurrent workers; unsupported or exploratory flows retain the serialized Agent CLI fallback. |
 
 ## Deterministic vs. judgment work
 

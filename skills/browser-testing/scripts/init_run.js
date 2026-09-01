@@ -20,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { resolveProjectRoot } = require('./project_root.js');
 
 let labels = ['run'];
 const args = process.argv.slice(2);
@@ -59,14 +60,16 @@ const d = new Date();
 const p = n => String(n).padStart(2, '0');
 const ts = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`;
 
-let runDir = path.join('executions', `execu_${ts}`);
-for (let n = 2; fs.existsSync(runDir); n++) runDir = path.join('executions', `execu_${ts}-${n}`);
+const projectRoot = resolveProjectRoot();
+let runDir = path.join(projectRoot, 'executions', `execu_${ts}`);
+for (let n = 2; fs.existsSync(runDir); n++) runDir = path.join(projectRoot, 'executions', `execu_${ts}-${n}`);
 
 // Every session name any execution in this project has already used (past or concurrent).
 const taken = new Set();
-if (fs.existsSync('executions')) {
-  for (const run of fs.readdirSync('executions')) {
-    const bs = path.join('executions', run, 'browser-sessions');
+const executionsDir = path.join(projectRoot, 'executions');
+if (fs.existsSync(executionsDir)) {
+  for (const run of fs.readdirSync(executionsDir)) {
+    const bs = path.join(executionsDir, run, 'browser-sessions');
     if (fs.existsSync(bs)) for (const s of fs.readdirSync(bs)) taken.add(s);
   }
 }
@@ -81,7 +84,8 @@ do {
 const bugsDir = path.join(runDir, 'bugs');
 fs.mkdirSync(path.join(bugsDir, 'screenshots'), { recursive: true });
 
-const out = { runDir, bugsDir, sessionTag: tag, sessions: {} };
+const displayPath = value => path.relative(projectRoot, value) || '.';
+const out = { projectRoot, runDir: displayPath(runDir), bugsDir: displayPath(bugsDir), sessionTag: tag, sessions: {} };
 names.forEach((s, i) => {
   const dir = path.join(runDir, 'browser-sessions', s);
   const logs = path.join(dir, 'logs');
@@ -90,6 +94,11 @@ names.forEach((s, i) => {
   fs.mkdirSync(screenshots, { recursive: true });
   // `label` is the label AS GIVEN — the spec's own name, non-ASCII included — so a
   // report can say which spec an ASCII session name stands for.
-  out.sessions[s] = { dir, logs, screenshots, label: original[i] };
+  out.sessions[s] = {
+    dir: displayPath(dir),
+    logs: displayPath(logs),
+    screenshots: displayPath(screenshots),
+    label: original[i],
+  };
 });
 console.log(JSON.stringify(out));

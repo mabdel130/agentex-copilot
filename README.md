@@ -127,12 +127,16 @@ Perform the following steps from the **application project**, not from this plug
 ### 1. Install Playwright Agent CLI and a browser
 
 ```bash
-npm install -D @playwright/cli@latest
+npm install -D @playwright/test @playwright/cli@latest
 ```
 
-Then install the browser engine you will use with `npx playwright-cli install-browser <browser>`:
+Then install the browser engine you will use with `npx playwright install <browser>`:
 `chromium`, `chrome`, `firefox`, `webkit`, or `msedge`. Agent CLI defaults to headless; request
 `headed` when you need to observe the run.
+
+Repeatable browser-only parallel runs use a single Playwright browser process with isolated,
+bounded worker contexts. Exploratory, integration, and unsupported flows retain the Agent CLI
+workflow.
 
 ### 2. Create AgenTeX configuration
 

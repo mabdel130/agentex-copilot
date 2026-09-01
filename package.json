@@ -1,9 +1,12 @@
 {
   "name": "agentex-copilot",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "description": "Agentic QA for GitHub Copilot, ported from AgenTeX. Prefer `copilot plugin install mabdel130/agentex-copilot` if you have the Copilot CLI; otherwise run `npx github:mabdel130/agentex-copilot` inside the project you want to test as a fallback.",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
   "bin": {
     "agentex-copilot": "scripts/install.js"
   },
@@ -13,5 +16,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
   }
 }
