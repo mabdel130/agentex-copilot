@@ -4,6 +4,9 @@ node_modules/
 # Playwright scratch
 .playwright/
 
+# Playwright CLI scratch
+.playwright-cli/
+
 # QA run artifacts — keep the folder + its README, ignore actual run outputs
 executions/*
 !executions/README.md
