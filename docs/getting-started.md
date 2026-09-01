@@ -75,11 +75,11 @@ Grant Copilot agent mode terminal access for Playwright (and `curl`/`sqlcmd` if 
 Test https://example.com — the signup form: happy path plus empty and bad-email cases.
 ```
 
-Here's what happens: the `test-orchestrator` agent restates what it's about to test and
-proposes a numbered list of scenarios — this is a checkpoint, nothing runs yet until you
-approve. Once you do, it opens a real browser and works through each scenario one at a time,
-pausing after each one so you can see the result before it continues. When it's done,
-everything lands in a new timestamped folder:
+Here's what happens: the invoking Copilot session follows the `test-orchestrator` workflow,
+restates what it's about to test, and proposes a numbered list of scenarios — this is a
+checkpoint, nothing runs yet until you approve. Once you do, it opens a real browser and works
+through each scenario one at a time, pausing after each one so you can see the result before it
+continues. When it's done, everything lands in a new timestamped folder:
 
 ```
 executions/execu_<timestamp>/
@@ -95,8 +95,8 @@ executions/execu_<timestamp>/
 - Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
 - Browser driver: `npm install -D @playwright/cli@latest && npx playwright-cli install-browser chromium`
 - Scaffold: ask Copilot "Set up AgenTeX for this project" (see step 3 above)
-- Run: describe what to test in plain language; the `browser-testing` skill delegates the run
-  to the test-orchestrator agent
+- Run: describe what to test in plain language; the `browser-testing` skill runs the
+  test-orchestrator workflow in the invoking session
 
 ## Next steps
 

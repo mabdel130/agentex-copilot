@@ -8,15 +8,16 @@
 request, not typed invocation). See [`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md)
 for the full conversion history.
 
-The `browser-testing` skill is the primary entry point and delegates the core loop to the two
-agents (`test-orchestrator`, `qa-executor` — see [`../agents/`](../agents/)). The remaining
-skills are invoked by name or natural-language trigger during a run.
+The `browser-testing` skill is the primary entry point and runs the core loop in the invoking
+Copilot session using the two agent files (`test-orchestrator`, `qa-executor` — see
+[`../agents/`](../agents/)) as role definitions. The remaining skills are invoked by name or
+natural-language trigger during a run.
 
 ## Capabilities
 
 | Skill | What it does |
 |---|---|
-| **[browser-testing](./browser-testing/SKILL.md)** | The primary entry point for testing a web application. Delegates to the `test-orchestrator` / `qa-executor` agents for real Playwright execution, sequential approvals or autonomous parallel regression, evidence capture, and durable run reports. |
+| **[browser-testing](./browser-testing/SKILL.md)** | The primary entry point for testing a web application. The invoking Copilot session follows the `test-orchestrator` / `qa-executor` roles for real Playwright execution, sequential approvals or autonomous parallel regression, evidence capture, and durable run reports. |
 | **[init-test](./init-test/SKILL.md)** | Scaffolds `config/project.json`, `config/environments/dev.json`, `.env`, an `integration/` catalog with sample API/DB entries, and starter `test/suite1/` specs (only when the project has none of its own) — idempotent, never overwrites. The Copilot-native equivalent of upstream's `/init-test` command. |
 | **[api-integration](./api-integration/SKILL.md)** | Executes user-defined API calls from the project's `integration/*_api.json` catalog for `api:` test-spec steps — never an improvised HTTP request. Bundled runner: `scripts/run_api.js`. |
 | **[db-integration](./db-integration/SKILL.md)** | Executes user-defined database queries from `integration/*_db.json` for `db:` steps (SQL Server via `sqlcmd`) — catalog-only, DDL always refused. Bundled runner: `scripts/run_db.js`. |

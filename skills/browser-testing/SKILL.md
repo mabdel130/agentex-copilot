@@ -5,9 +5,11 @@ description: Test a website or web application through Playwright Agent CLI brow
 
 # Browser Testing
 
-Use the installed `test-orchestrator` agent for every browser-testing request. It owns
-environment and suite resolution, scenario planning, sequential approval checkpoints, parallel
-execution, evidence collection, defect reporting, and final run artifacts.
+Run every browser-testing request in the **invoking Copilot session**. Read the installed
+`test-orchestrator` and `qa-executor` agent files as the authoritative workflow and
+per-spec execution role definitions, then perform their work yourself using this session's
+terminal and browser capabilities. Do not dispatch either agent for browser work: custom-agent
+runtimes may not receive the invoking session's browser, terminal, or file permissions.
 
 ## Bundled assets
 
@@ -23,7 +25,9 @@ execution, evidence collection, defect reporting, and final run artifacts.
 - For exploratory requests, use sequential mode by default. The orchestrator must obtain scope
   and plan approval before interacting with the browser, then pause after every scenario.
 - Use parallel mode only when the user explicitly asks for a parallel, autonomous, fast, or
-  regression run. The orchestrator dispatches one isolated `qa-executor` session per spec file.
+  regression run. Create one isolated browser session per spec file and execute without
+  checkpoints. If the Copilot runtime cannot grant tool-capable worker agents, run those
+  sessions from the invoking session; do not claim that the files ran concurrently.
 - If the user names a suite such as `suite3` or `test/suite3/`, run only that suite. Otherwise
   use the supplied specs or `test/suite1/`.
 - If no test specs exist, let the orchestrator scaffold the bundled samples before proceeding.
@@ -42,5 +46,6 @@ execution, evidence collection, defect reporting, and final run artifacts.
 - Store all execution artifacts beneath `executions/execu_<timestamp>/`, including `report.md`,
   `run-summary.json`, session logs/screenshots, and consolidated defects. Create
   `extent-report.html` only when the resolved dashboard option is enabled.
-- Do not recreate the orchestration logic in this skill. Read and follow the two agents as the
-  authoritative workflow definitions.
+- Do not recreate the orchestration logic in this skill. Read and follow the two agent files as
+  the authoritative workflow definitions, adapting their delegated-worker language to direct
+  execution in the invoking session.

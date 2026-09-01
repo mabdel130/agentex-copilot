@@ -2,6 +2,13 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.6.5] — 2026-09-01
+
+### Fixed
+- Browser testing now runs in the invoking Copilot session instead of dispatching custom agents
+  that may not receive terminal, browser, or file capabilities. The bundled agent files remain
+  the authoritative orchestration and per-spec execution roles.
+
 ## [2.6.4] — 2026-08-30
 
 ### Added

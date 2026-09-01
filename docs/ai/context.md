@@ -28,9 +28,9 @@ browser testing, without writing and maintaining a full test automation framewor
 ## Capabilities available to the agents (upstream reference)
 
 This plugin ships 13 skills, including the Copilot-native `init-test` skill. The
-`browser-testing` skill delegates the core loop to the `test-orchestrator` and `qa-executor`
-agents. Full descriptions live in [`skills/README.md`](../../skills/README.md); the short
-version:
+`browser-testing` skill runs the core loop in the invoking Copilot session using the
+`test-orchestrator` and `qa-executor` files as role definitions. Full descriptions live in
+[`skills/README.md`](../../skills/README.md); the short version:
 
 - **browser-testing** — the core loop this port implements.
 - **api-integration** / **db-integration** — catalog-only `api:`/`db:` spec steps.

@@ -311,8 +311,10 @@ upstream `agentex` plugin.json version changes.
 Upstream's durable run record and enriched HTML report were adapted as `run-summary.json`
 (schema version 2), the enhanced extent-report renderer, and matching Copilot agent
 instructions. Version 2.6.1 also adds `skills/browser-testing/SKILL.md` as the discoverable
-Copilot entry point; it delegates execution to the Copilot-native agents instead of duplicating
-the upstream Claude workflow. The upstream's remaining v0.20/v0.21 additions include Claude
+Copilot entry point; it originally delegated execution to Copilot-native agents instead of
+duplicating the upstream Claude workflow. Current versions run the workflow in the invoking
+Copilot session because custom-agent runtimes may not receive browser, terminal, and file
+capabilities. The upstream's remaining v0.20/v0.21 additions include Claude
 headless CI launching, a Claude self-update runner, Claude-era configuration migrations, a
 local setup wizard, and upstream-only release/evaluation fixtures. They are not copied because
 they either invoke Claude Code or maintain the upstream repository rather than an installed

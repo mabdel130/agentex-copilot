@@ -1,7 +1,7 @@
 {
   "name": "agentex-copilot",
   "description": "Agentic QA for GitHub Copilot — skip the manual grind. AgenTeX plans and runs tests (human-in-the-loop or fully autonomous) with structured evidence, durable run summaries, and a consolidated defect report, driving a real browser via Playwright. Test steps can call cataloged APIs and databases and ask a project's knowledge base for advisory context. Adapted from AgenTeX (github.com/MhmdElGazzar/agentex), a Claude Code plugin.",
-  "version": "2.6.4",
+  "version": "2.6.5",
   "author": {
     "name": "Mohamed Abdel Ghany",
     "email": "mohamedgh019@gmail.com"

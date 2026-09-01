@@ -4,7 +4,8 @@
 //   copilot plugin install mabdel130/agentex-copilot
 // This script vendors the same agent, browser-testing skill, and policy files directly into a
 // project instead, plus a .github/copilot-instructions.md pointer so Copilot Chat picks them up
-// automatically. It never overwrites a file that already exists — safe to re-run.
+// automatically. Re-runs update plugin-owned assets while preserving project instructions and
+// configuration files.
 
 const fs = require('fs');
 const path = require('path');
@@ -50,6 +51,7 @@ if (targetRoot === sourceRoot) {
 }
 
 const created = [];
+const updated = [];
 const skipped = [];
 
 function copyDir(src, dest) {
@@ -60,7 +62,12 @@ function copyDir(src, dest) {
     if (entry.isDirectory()) {
       copyDir(srcPath, destPath);
     } else if (fs.existsSync(destPath)) {
-      skipped.push(path.relative(targetRoot, destPath));
+      if (fs.readFileSync(srcPath).equals(fs.readFileSync(destPath))) {
+        skipped.push(path.relative(targetRoot, destPath));
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+        updated.push(path.relative(targetRoot, destPath));
+      }
     } else {
       fs.copyFileSync(srcPath, destPath);
       created.push(path.relative(targetRoot, destPath));
@@ -109,8 +116,12 @@ if (created.length) {
   console.log('Created:');
   created.forEach((f) => console.log('  [created] ' + f));
 }
+if (updated.length) {
+  console.log('Updated bundled AgenTeX assets:');
+  updated.forEach((f) => console.log('  [updated] ' + f));
+}
 if (skipped.length) {
-  console.log('Already present (left untouched):');
+  console.log('Already current or project-owned (left untouched):');
   skipped.forEach((f) => console.log('  [skipped] ' + f));
 }
 

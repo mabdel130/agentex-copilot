@@ -5,9 +5,8 @@ code — each file is a plain-language description of what to test.
 
 ## How specs are organized
 
-- **One spec = one file.** In **parallel** mode AgenTeX dispatches one `qa-executor` agent
-  (its own isolated browser session) **per file**, so keep each file to a single independent
-  feature/flow.
+- **One spec = one file.** In **parallel** mode the invoking Copilot session uses an isolated
+  browser session **per file**, so keep each file to a single independent feature/flow.
 - **Group related specs into a suite folder** — e.g. `test/suite1/`. A suite is just a
   folder of spec files you want to run together.
 - **Keep a stateful flow inside one file.** If steps depend on each other (search →

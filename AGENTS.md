@@ -19,8 +19,8 @@ one session per spec file). It **never modifies application code**.
 
 | Agent | File | Role |
 |---|---|---|
-| **test-orchestrator** | [`agents/test-orchestrator.agent.md`](./agents/test-orchestrator.agent.md) | Plans scenarios, resolves the target environment, decides sequential vs. parallel mode, dispatches executors, merges results into the final report. This is the agent the user talks to. |
-| **qa-executor** | [`agents/qa-executor.agent.md`](./agents/qa-executor.agent.md) | Runs a single test spec to completion in an isolated browser session and returns a defect report. Dispatched by the orchestrator — never invoked directly by the user. |
+| **test-orchestrator** | [`agents/test-orchestrator.agent.md`](./agents/test-orchestrator.agent.md) | Workflow definition the invoking Copilot session follows to resolve, plan, execute, and report a run. |
+| **qa-executor** | [`agents/qa-executor.agent.md`](./agents/qa-executor.agent.md) | Per-spec execution role the invoking session follows in each isolated browser session. |
 
 ## How to use this plugin
 
@@ -42,8 +42,10 @@ logs/screenshots, and a merged
 ## Browser-testing skill
 
 [`skills/browser-testing/SKILL.md`](./skills/browser-testing/SKILL.md) is the entry point for
-browser requests. Its `references/playwright.md` defines browser and evidence rules; its helper
-scripts preflight Playwright, create isolated run/session paths, and merge defect evidence.
+browser requests. The invoking Copilot session performs the workflow itself because it owns the
+browser, terminal, and file permissions; the agent files provide the role definitions. Its
+`references/playwright.md` defines browser and evidence rules; its helper scripts preflight
+Playwright, create isolated run/session paths, and merge defect evidence.
 
 ## Non-negotiable rules for every agent in this plugin
 

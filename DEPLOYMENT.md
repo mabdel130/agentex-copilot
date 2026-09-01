@@ -84,7 +84,8 @@ plugin's files into that shape:
 npx github:mabdel130/agentex-copilot --target .
 ```
 
-This is idempotent (safe to re-run, never overwrites a file you've already edited) and creates:
+This is safe to re-run: it updates the plugin-owned files under `.github/agentex/` and preserves
+your root instructions and configuration files. It creates:
 
 ```
 your-project/
@@ -269,6 +270,6 @@ otherwise — AgenTeX reports defects, it does not gate merges by default.
 | `copilot plugin install` fails to find the repo | Repo is private, or `copilot` isn't authenticated to GitHub | Confirm `copilot` is logged in and has access; `mabdel130/agentex-copilot` is public. |
 | Copilot Chat doesn't seem to know about AgenTeX (fallback path) | `.github/copilot-instructions.md` missing or not committed | Confirm the file exists at that exact path and is tracked by git. |
 | "environment has no file" | `defaultEnvironment` or requested env doesn't match a file in `config/environments/` | Create the matching `<env>.json` or fix the name — never falls back silently. |
-| Agent says it cannot access the filesystem, shell, or browser | The agent profile was installed with a restrictive `tools:` allowlist, or the runtime withheld the required capabilities | Update AgenTeX, then start a new Copilot session. Agent profiles must omit `tools:` so they inherit the runtime's file, terminal, and browser capabilities; allow Playwright when prompted. |
+| Browser testing stops because a custom agent cannot access the filesystem, shell, or browser | That runtime does not inherit the invoking session's capabilities | Update AgenTeX, then start a new Copilot session. Current versions run browser work in the invoking session; allow Playwright and the required file/terminal operations when prompted. |
 | Secrets appearing in logs | A step tried to print an `envSecret` value directly | This is a bug — file an issue; agents must resolve secrets only at point of use. |
 | Browser session collisions in parallel mode | Two sessions sharing the same session id | Each spec file must get its own session id from the orchestrator. |

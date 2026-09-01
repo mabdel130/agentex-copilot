@@ -13,10 +13,10 @@ Use the browser-testing skill and two agent roles when asked to test something:
   evidence, run-directory, and isolated-session rules.
 
 - **`.github/agentex/agents/test-orchestrator.agent.md`** — read this first for any testing
-  request. Plans scenarios, resolves the target environment, decides sequential vs. parallel
-  mode, dispatches executors, merges results into a report.
-- **`.github/agentex/agents/qa-executor.agent.md`** — the role for running one test spec file
-  to completion in an isolated browser session.
+  request. Follow it yourself in the invoking Copilot session: it plans scenarios, resolves the
+  target environment, decides the mode, executes, and merges results into a report.
+- **`.github/agentex/agents/qa-executor.agent.md`** — the per-spec role to follow in an
+  isolated browser session. Do not dispatch it as a custom agent; it may lack browser tools.
 
 Non-negotiable rules (full detail in `.github/agentex/ai-docs/`):
 

@@ -5,7 +5,8 @@ test, check, verify, or find defects in this application's behavior:
 
 1. Read `AGENTS.md` at the repository root.
 2. Read `.github/agentex/skills/browser-testing/SKILL.md` for browser setup and evidence rules.
-3. Read `.github/agentex/agents/test-orchestrator.agent.md` for how to plan and run the test.
+3. Read `.github/agentex/agents/test-orchestrator.agent.md` for how to plan and run the test
+   yourself in this Copilot session. Do not delegate browser work to a custom agent runtime.
 4. Read `.github/agentex/ai-docs/security-policy.md` and `testing-policy.md` before judging
    PASS/FAIL or touching any secret/config value.
 

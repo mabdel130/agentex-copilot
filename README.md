@@ -7,7 +7,7 @@ real browser with Playwright, captures evidence, and creates a consolidated defe
 designed for exploratory testing, feature validation, and regression checks; it does not replace
 your unit or integration test suite.
 
-[![Version](https://img.shields.io/badge/version-2.6.4-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.6.5-blue.svg)](./CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 [![GitHub Copilot CLI Plugin](https://img.shields.io/badge/GitHub%20Copilot%20CLI-plugin-8957e5.svg?logo=githubcopilot&logoColor=white)](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
 [![Playwright](https://img.shields.io/badge/Playwright-Chromium%2FFirefox%2FWebKit-2EAD33.svg?logo=playwright&logoColor=white)](https://playwright.dev)
@@ -43,12 +43,13 @@ When you ask Copilot to test a feature, AgenTeX:
 5. Produces a report with passed, failed, and blocked scenarios, along with reproducible defect
    details.
 
-Two built-in agents handle the work:
+The invoking Copilot session handles browser work because it has the terminal, browser, and
+file permissions required to capture evidence. Two bundled agent files define the workflow:
 
 | Agent | Purpose |
 |---|---|
-| [`test-orchestrator`](./agents/test-orchestrator.agent.md) | The agent you talk to. It resolves the environment, plans scenarios, coordinates execution, and assembles the final report. |
-| [`qa-executor`](./agents/qa-executor.agent.md) | Runs one test specification in an isolated browser session. The orchestrator dispatches it; users do not call it directly. |
+| [`test-orchestrator`](./agents/test-orchestrator.agent.md) | The workflow the invoking session follows to resolve the environment, plan scenarios, execute them, and assemble the final report. |
+| [`qa-executor`](./agents/qa-executor.agent.md) | The per-spec execution role followed in an isolated browser session; it is not dispatched as a custom agent. |
 
 ## Before you begin
 
@@ -116,8 +117,8 @@ npx github:mabdel130/agentex-copilot --target .
 ```
 
 The fallback installer creates the Copilot instructions, agent files, starter configuration, and
-test folders inside the target project. It is idempotent: it does not overwrite files that are
-already present.
+test folders inside the target project. Re-running it updates plugin-owned files under
+`.github/agentex/` while preserving the target project's instructions and configuration.
 
 ## Prepare the project to test
 
