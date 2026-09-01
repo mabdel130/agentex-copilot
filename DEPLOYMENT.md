@@ -35,7 +35,8 @@ signed in, `/exit` (or Ctrl+C) to leave the interactive session.
 ### 3. Install the plugin (once per machine)
 
 ```bash
-copilot plugin install mabdel130/agentex-copilot
+copilot plugin marketplace add mabdel130/agentex-copilot
+copilot plugin install agentex-copilot@agentex-copilot
 ```
 
 This installs `plugin.json`, `agents/*.agent.md`, and all 13 skills under `skills/` into your
@@ -54,22 +55,9 @@ copilot plugin list
 Manage it with the usual commands:
 
 ```bash
-copilot plugin update mabdel130/agentex-copilot
-copilot plugin disable mabdel130/agentex-copilot   # or: uninstall
+copilot plugin update agentex-copilot@agentex-copilot
+copilot plugin disable agentex-copilot@agentex-copilot   # or: uninstall
 ```
-
-This repo also self-hosts a marketplace ([`.github/plugin/marketplace.json`](./.github/plugin/marketplace.json))
-so you can install through the marketplace flow instead of a direct install, if you prefer it
-or your team standardizes on marketplaces generally:
-
-```bash
-copilot plugin marketplace add mabdel130/agentex-copilot
-copilot plugin install agentex-copilot@agentex-copilot
-```
-
-Both commands above install the exact same plugin — direct install and marketplace install are
-equivalent here, since the marketplace only lists this one plugin, sourced from `.` (this repo's
-own root).
 
 ## Fallback path: no Copilot CLI (VS Code Copilot Chat only)
 

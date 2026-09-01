@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Fallback installer for environments without the `copilot` CLI (e.g. VS Code Copilot Chat
 // only). If you have the Copilot CLI, prefer:
-//   copilot plugin install mabdel130/agentex-copilot
+//   copilot plugin marketplace add mabdel130/agentex-copilot
+//   copilot plugin install agentex-copilot@agentex-copilot
 // This script vendors the same agent, browser-testing skill, and policy files directly into a
 // project instead, plus a .github/copilot-instructions.md pointer so Copilot Chat picks them up
 // automatically. Re-runs update plugin-owned assets while preserving project instructions and
@@ -133,5 +134,6 @@ Next steps:
   4. In Copilot Chat (agent mode), ask: "Test <your-url> — <what to check>"
 
 If you have the Copilot CLI, you likely didn't need this script — try instead:
-  copilot plugin install mabdel130/agentex-copilot
+  copilot plugin marketplace add mabdel130/agentex-copilot
+  copilot plugin install agentex-copilot@agentex-copilot
 `);

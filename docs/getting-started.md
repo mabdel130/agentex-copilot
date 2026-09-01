@@ -14,7 +14,8 @@ Pick exactly one path:
 browser flow. Then:
 
 ```bash
-copilot plugin install mabdel130/agentex-copilot
+copilot plugin marketplace add mabdel130/agentex-copilot
+copilot plugin install agentex-copilot@agentex-copilot
 ```
 
 **Don't have it (VS Code Copilot Chat only)?** Run this from the project you want to test
@@ -92,7 +93,8 @@ executions/execu_<timestamp>/
 
 ## Quick reference
 
-- Install: `copilot plugin install mabdel130/agentex-copilot` (or the fallback in step 1)
+- Install: `copilot plugin marketplace add mabdel130/agentex-copilot`, then
+  `copilot plugin install agentex-copilot@agentex-copilot` (or use the fallback in step 1)
 - Browser driver: `npm install -D @playwright/test @playwright/cli@latest && npx playwright install chromium`
 - Scaffold: ask Copilot "Set up AgenTeX for this project" (see step 3 above)
 - Run: describe what to test in plain language; the `browser-testing` skill runs the

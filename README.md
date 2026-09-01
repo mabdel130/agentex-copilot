@@ -85,7 +85,8 @@ session and finish the browser sign-in flow. Exit the session when authenticatio
 #### 2. Install the plugin
 
 ```bash
-copilot plugin install mabdel130/agentex-copilot
+copilot plugin marketplace add mabdel130/agentex-copilot
+copilot plugin install agentex-copilot@agentex-copilot
 ```
 
 Verify that Copilot sees it:
@@ -97,14 +98,7 @@ copilot plugin list
 To update an installed plugin later:
 
 ```bash
-copilot plugin update mabdel130/agentex-copilot
-```
-
-Alternatively, install it through the repository's marketplace:
-
-```bash
-copilot plugin marketplace add mabdel130/agentex-copilot
-copilot plugin install agentex-copilot@agentex-copilot
+copilot plugin update agentex-copilot@agentex-copilot
 ```
 
 ### Option B: VS Code Copilot Chat fallback
