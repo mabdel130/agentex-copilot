@@ -26,3 +26,9 @@ test/.auth/
 .idea/
 .DS_Store
 Thumbs.db
+# Private planning repo (own git, never published with the plugin)
+.planning/
+
+# OS / editor
+.DS_Store
+Thumbs.db

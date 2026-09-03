@@ -1,0 +1,15 @@
+{
+  "name": "my-project",
+  "defaultEnvironment": "dev",
+  "kb": {
+    "baseUrl": "",
+    "project": ""
+  },
+  "login": { "mode": "session" },
+  "playwright": {
+    "browser": "chromium",
+    "mode": "headless",
+    "persistent": false,
+    "dashboard": true
+  }
+}

@@ -137,7 +137,9 @@ than taken on faith this time:
 - [docs.github.com/en/copilot/concepts/agents/about-plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins) — plugin concept, components (agents, skills, hooks, MCP/LSP configs), install methods.
 - [docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference) — the actual `plugin.json` schema: only `name` is required; `agents`/`skills` default to `agents/`/`skills/` if omitted; manifest may live at `plugin.json`, `.plugin/plugin.json`, `.github/plugin/plugin.json`, or `.claude-plugin/plugin.json`.
 - [github.com/github/copilot-plugins](https://github.com/github/copilot-plugins) — GitHub's own official plugin examples repo (notably, it ships a `.claude-plugin/` directory itself — the two ecosystems can share a manifest location).
-- Real install commands confirmed from official docs and a third-party technical writeup: `copilot plugin install OWNER/REPO`, `copilot plugin marketplace add OWNER/REPO`, `copilot plugin install NAME@MARKETPLACE`.
+- Real install commands confirmed from official docs and a third-party technical writeup:
+  `copilot plugin install OWNER/REPO`, `copilot plugin marketplace add OWNER/REPO`,
+  `copilot plugin install NAME@MARKETPLACE`.
 
 What was genuinely wrong in v2.0.0, and is fixed now:
 
