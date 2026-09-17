@@ -20,3 +20,11 @@ Run a parallel regression against staging using test/regression/.
 Parallel specs must be independent and use isolated QA accounts or test data. Every run writes a
 report and evidence under `executions/execu_<timestamp>/`. Browser behavior and evidence rules
 are defined in [`skills/browser-testing/SKILL.md`](../skills/browser-testing/SKILL.md).
+
+## Performance tips
+
+For manifest-eligible specs, parallel mode compiles a manifest and runs it through
+`run_parallel.js` — one browser process, bounded concurrency (`playwright.workers`, default 4),
+no per-step Agent CLI round trips. Combine with a reused login session
+([optimize login](./optimize-login.md)) for the fastest runs. See
+[Performance](./performance.md) for the full guidance.

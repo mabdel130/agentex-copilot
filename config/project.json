@@ -10,6 +10,7 @@
     "browser": "chromium",
     "mode": "headless",
     "persistent": false,
-    "dashboard": true
+    "dashboard": true,
+    "workers": 4
   }
 }

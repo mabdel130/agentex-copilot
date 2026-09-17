@@ -2,6 +2,23 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.6.7] — 2026-09-18
+
+### Added
+- `docs/performance.md`, a consolidated guide for speeding up AgenTeX runs: preferring the
+  `run_parallel.js` fast path over per-step Agent CLI driving, reusing cached login sessions,
+  tuning `playwright.workers`, skipping the dashboard for routine runs, keeping Copilot session
+  context lean, avoiding mid-run model/reasoning switches (prompt-cache preservation), and
+  splitting independent scenarios across specs for better parallelism.
+- `playwright.workers` project setting (default `4`, max `16`) resolved by the orchestrator into
+  `run_parallel.js` manifests' `options.workers`.
+
+### Changed
+- `agents/test-orchestrator.agent.md` and `skills/browser-testing/SKILL.md` now document worker
+  resolution and link to the new performance guide.
+- `docs/browser-testing.md`, `docs/configuration.md`, `docs/README.md`, and the root `README.md`
+  cross-link the performance guide.
+
 ## [2.6.6] — 2026-09-01
 
 ### Added
