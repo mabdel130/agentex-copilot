@@ -8,6 +8,7 @@
 | [Getting started](./getting-started.md) | Install, configure, and run a first test. |
 | [Configuration](./configuration.md) | Project, environment, and secret configuration. |
 | [Browser testing](./browser-testing.md) | Sequential and parallel browser QA. |
+| [Performance](./performance.md) | Speed up runs: fast-path runner, login reuse, worker tuning, context hygiene. |
 | [API and DB steps](./api-db-steps.md) | Catalog-only integration checks. |
 | [Ask KB](./ask-kb.md) | Advisory knowledge-base questions. |
 | [Define flow](./define-flow.md) | Build a test spec through a live session. |

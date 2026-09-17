@@ -39,16 +39,19 @@ environment name in `report.md`.
 
 Resolve `playwright` in `config/project.json` before preflight. Request-level choices override
 the configuration: "Firefox", "Chrome", "WebKit", or "Edge" select that browser; "headed" or
-"headless" select the launch mode; "persistent" selects a persistent browser profile; and
-"with/without dashboard" selects HTML dashboard generation. Defaults are:
+"headless" select the launch mode; "persistent" selects a persistent browser profile; "with/
+without dashboard" selects HTML dashboard generation; and a stated worker count (e.g. "with 6
+workers") overrides `workers`. Defaults are:
 
 ```json
-{ "browser": "chromium", "mode": "headless", "persistent": false, "dashboard": true }
+{ "browser": "chromium", "mode": "headless", "persistent": false, "dashboard": true, "workers": 4 }
 ```
 
 Accept only `chromium`, `chrome`, `firefox`, `webkit`, and `msedge` as `browser`, and only
 `headless` or `headed` as `mode`. Reject conflicting or unsupported requested values rather than
-silently changing the browser. Include the resolved settings in `report.md` and safe
+silently changing the browser. `workers` must be an integer from 1 to 16 (the `run_parallel.js`
+validation ceiling); it is only used to populate `options.workers` in a parallel-mode manifest
+and is ignored otherwise. Include the resolved settings in `report.md` and safe
 `run-summary.json` metadata. `dashboard: false` skips only `extent-report.html`; `report.md`,
 `run-summary.json`, logs, screenshots, and defects remain required. With Playwright Agent CLI,
 `chromium` is the default and omits `--browser`; pass `--browser=<browser>` for every other
@@ -191,6 +194,39 @@ distinct safe label for each spec; in sequential mode, pass one label such as `s
 Use only generated session paths and merge defect screenshots through `scripts/merge_run.js`.
 Use `run_parallel.js` for eligible constrained manifests, or drive the fallback browser from the
 invoking session with `npx playwright-cli -s=<session>` and the resolved flags.
+
+## Performance
+
+Speed comes from doing less LLM-driven work per scenario, not from rushing evidence or skipping
+checkpoints. Apply these, in order of expected impact:
+
+1. **Prefer the fast-path runner over turn-by-turn driving.** For manifest-eligible specs
+   (actions limited to `goto`, `click`, `fill`, `press`, `assertVisible`, `assertCount`),
+   compile the manifest once and invoke `run_parallel.js` instead of issuing one Agent CLI
+   command per step. This replaces many small LLM-mediated actions with one deterministic script
+   run — the single biggest lever, since each avoided round trip is both latency and token cost.
+2. **Reuse the login instead of paying for it every scenario.** Follow `optimize-login`: script
+   the login once, save `storageState`, and resume it (`login.mode: "session"`). Only re-drive a
+   live login when the saved session fails its landmark check.
+3. **Tune `workers` to the run, not just the default.** More independent specs and more CPU/RAM
+   headroom justify raising `workers` (max 16, enforced by `run_parallel.js`); a resource-
+   constrained box or flaky specs justify lowering it. State the chosen value in `report.md`.
+4. **Skip the dashboard for routine/CI-style runs.** `dashboard: false` removes
+   `extent-report.html` generation without touching `report.md`, `run-summary.json`, or
+   evidence — use it when no one will open the interactive report.
+5. **Keep this session's context lean.** Read only the spec files and config needed for the
+   active run; don't re-read files already in context. Start a fresh Copilot session (`/new`)
+   between unrelated suites/projects instead of carrying an old run's history forward, and use
+   `/compact` rather than letting one session grow unbounded across many runs.
+6. **Don't change models or reasoning effort mid-run.** Doing so invalidates the prompt cache and
+   forces the full context to be re-sent as fresh input tokens. Pick a model once per run and
+   keep it for planning, execution, and reporting.
+7. **Group stateful, split independent.** Scenarios that share state stay in one spec (required
+   for correctness); unrelated scenarios split across more spec files so parallel mode has more
+   independently schedulable units.
+
+None of the above may skip a required checkpoint, evidence capture, or safety rule — performance
+work only removes redundant LLM turns and idle time, never required verification.
 
 ## Rules
 - Think out loud: state your reasoning before each action so the user can follow the chain.

@@ -19,3 +19,7 @@ not value:
 
 Never commit `.env`, real customer data, or saved browser login state. The full configuration
 example is in [`config/project.json.example`](../config/project.json.example).
+
+`playwright.workers` (default `4`, max `16`) bounds parallel-mode concurrency for
+`run_parallel.js`; `playwright.dashboard: false` skips only the optional HTML report. See
+[Performance](./performance.md) for tuning guidance.

@@ -30,10 +30,12 @@ runtimes may not receive the invoking session's browser, terminal, or file permi
   regression run. Create one isolated browser session per spec file and execute without
   checkpoints. For repeatable browser-only specs, compile a constrained manifest and invoke
   `run_parallel.js` once; it provides real bounded concurrency using one browser process with
-  isolated contexts. Keep stateful scenarios ordered within their own spec. Fall back to the
-  Agent CLI workflow when a spec requires interactive exploration or cannot be represented by
-  the manifest; set `stateful: true` on a manifest spec to preserve its scenario order without
-  resetting the page between scenarios. Do not claim concurrency for a serialized fallback.
+  isolated contexts. Resolve `options.workers` from `config/project.json`'s `playwright.workers`
+  (default 4, 1–16) unless the request states a different count. Keep stateful scenarios ordered
+  within their own spec. Fall back to the Agent CLI workflow when a spec requires interactive
+  exploration or cannot be represented by the manifest; set `stateful: true` on a manifest spec
+  to preserve its scenario order without resetting the page between scenarios. Do not claim
+  concurrency for a serialized fallback.
 - If the user names a suite such as `suite3` or `test/suite3/`, run only that suite. Otherwise
   use the supplied specs or `test/suite1/`.
 - If no test specs exist, let the orchestrator scaffold the bundled samples before proceeding.
@@ -90,6 +92,14 @@ The required shape is:
 plus a non-negative `minimum`. The runner saves one screenshot and sanitized browser-event
 metadata per scenario. It never writes the final report; the orchestrator merges
 `runner-results.json` into the established report and dashboard artifacts.
+
+## Performance
+
+See [`docs/performance.md`](../../docs/performance.md) for the full guidance. In short: prefer
+`run_parallel.js` over per-step Agent CLI driving whenever a spec is manifest-eligible, reuse
+saved login sessions instead of re-authenticating per scenario, tune `playwright.workers` to the
+machine and suite size, skip the dashboard for routine runs, and keep one model/session per run
+to preserve prompt caching.
 
 ## Required behavior
 

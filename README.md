@@ -231,8 +231,9 @@ Set `defaultEnvironment` to the filename you will use under `config/environments
 `"dev"` selects `config/environments/dev.json`.
 
 `playwright` is optional. Use it to choose the default browser, headless/headed launch mode,
-isolated persistent profile, and whether to create `extent-report.html`. A request can override
-any setting: for example, “Run the checkout regression headed in Firefox without a dashboard.”
+isolated persistent profile, whether to create `extent-report.html`, and the parallel-mode
+`workers` count (default `4`, max `16`). A request can override any setting: for example, “Run
+the checkout regression headed in Firefox without a dashboard.”
 
 ### 2. Set the URL and disposable test users
 
@@ -432,6 +433,7 @@ Read the full [security policy](./docs/ai/security-policy.md) and
 ## More documentation
 
 - [Getting started](./docs/getting-started.md) — condensed first-run walkthrough
+- [Performance](./docs/performance.md) — speed up runs: fast-path runner, login reuse, worker tuning, context hygiene
 - [Deployment guide](./DEPLOYMENT.md) — plugin installation, fallback setup, permissions, and CI notes
 - [Implementation guide](./docs/IMPLEMENTATION_GUIDE.md) — multi-environment project setup
 - [Upstream synchronization](./docs/UPSTREAM_SYNC.md) — weekly upstream change notifications and porting workflow
