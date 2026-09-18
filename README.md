@@ -168,6 +168,10 @@ your-project/
 Starter files under `test/suite1/` are examples. Adapt or replace them with scenarios for your
 application.
 
+Prefer a form over hand-editing JSON? `init-test` also offers to launch the optional
+[Setup Wizard](./docs/setup-wizard.md) — a local, `127.0.0.1`-only browser UI that writes the
+same config files (and any secrets straight to `.env`).
+
 ### 3. Allow the required Copilot tools
 
 Copilot's tool-approval and directory-trust prompts are a deliberate security boundary, so the
@@ -433,6 +437,7 @@ Read the full [security policy](./docs/ai/security-policy.md) and
 ## More documentation
 
 - [Getting started](./docs/getting-started.md) — condensed first-run walkthrough
+- [Setup Wizard](./docs/setup-wizard.md) — optional browser UI to fill in project/environment config
 - [Performance](./docs/performance.md) — speed up runs: fast-path runner, login reuse, worker tuning, context hygiene
 - [Deployment guide](./DEPLOYMENT.md) — plugin installation, fallback setup, permissions, and CI notes
 - [Implementation guide](./docs/IMPLEMENTATION_GUIDE.md) — multi-environment project setup

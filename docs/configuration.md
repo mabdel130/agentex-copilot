@@ -10,6 +10,9 @@ AgenTeX separates project defaults, environment data, and secrets.
 
 Create the starter files by asking Copilot: `Set up AgenTeX for this project.`
 
+Prefer a form to hand-editing JSON? Run the optional [Setup Wizard](./setup-wizard.md) — a
+local browser UI offered as a step of `init-test`.
+
 Set `defaultEnvironment` to a matching file in `config/environments/`. Refer to secrets by name,
 not value:
 

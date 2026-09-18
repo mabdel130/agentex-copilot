@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgenTeX Setup Wizard</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    margin: 0; background: #0f172a; color: #e2e8f0; min-height: 100vh;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .sub { color: #94a3b8; margin-top: 0; margin-bottom: 24px; font-size: 0.9rem; }
+  .steps { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+  .steps span {
+    font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; background: #1e293b; color: #64748b;
+  }
+  .steps span.active { background: #2563eb; color: #fff; }
+  .steps span.done { background: #14532d; color: #86efac; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px; }
+  .card h2 { margin-top: 0; font-size: 1.1rem; }
+  .hint { color: #94a3b8; font-size: 0.8rem; margin: -4px 0 14px; }
+  label { display: block; font-size: 0.85rem; margin-bottom: 4px; color: #cbd5e1; }
+  input[type=text], input[type=url], input[type=number], input[type=password], select {
+    width: 100%; padding: 8px 10px; margin-bottom: 14px; background: #0f172a; color: #e2e8f0;
+    border: 1px solid #334155; border-radius: 8px; font-size: 0.9rem;
+  }
+  .row { display: flex; gap: 12px; }
+  .row > div { flex: 1; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .checkbox-row input { width: auto; margin: 0; }
+  .user-card { border: 1px dashed #334155; border-radius: 8px; padding: 12px; margin-bottom: 12px; position: relative; }
+  .user-card button.remove {
+    position: absolute; top: 8px; right: 8px; background: #7f1d1d; color: #fecaca; border: none;
+    border-radius: 6px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;
+  }
+  .actions { display: flex; justify-content: space-between; margin-top: 20px; }
+  button { cursor: pointer; border: none; border-radius: 8px; padding: 10px 18px; font-size: 0.9rem; font-weight: 600; }
+  button.primary { background: #2563eb; color: #fff; }
+  button.secondary { background: #334155; color: #e2e8f0; }
+  button.ghost { background: transparent; color: #93c5fd; border: 1px dashed #334155; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .errors { background: #7f1d1d; color: #fecaca; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.85rem; }
+  .errors ul { margin: 4px 0 0; padding-left: 18px; }
+  pre.review {
+    background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px;
+    font-size: 0.78rem; overflow-x: auto; max-height: 260px;
+  }
+  .success { text-align: center; padding: 40px 0; }
+  .success h2 { color: #86efac; }
+  .fine { font-size: 0.75rem; color: #64748b; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AgenTeX Setup Wizard</h1>
+  <p class="sub">Fill in your project config from a friendly UI. Values are saved directly to
+    local files on your machine — nothing here is sent anywhere else.</p>
+  <div class="steps" id="steps"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+(function () {
+  const TOKEN = '__WIZARD_TOKEN__';
+  const PROJECT_ROOT = "__PROJECT_ROOT__";
+
+  const STEP_NAMES = ['Project', 'Environment', 'Test users', 'Integrations', 'Review'];
+  let step = 0;
+  let existing = null;
+
+  const answers = {
+    name: '', 'login.mode': 'session',
+    'playwright.browser': 'chromium', 'playwright.mode': 'headless',
+    'playwright.persistent': false, 'playwright.dashboard': true, 'playwright.workers': 4,
+    envName: 'dev', portalUrl: '',
+    'defaults.otp': '0000', 'defaults.password': 'Test@1234',
+    users: [{ handle: 'valid_user', phone: '0550000001', email: '', role: 'customer', notes: '' }],
+    'db.server': '', 'db.port': 1433, 'db.name': '', 'db.user': '', 'db.passwordEnvVar': 'SQLCMDPASSWORD', 'db.passwordValue': '',
+    'api.baseUrl': '', 'api.tokenEnvVar': 'API_TOKEN', 'api.tokenValue': '',
+    'kb.baseUrl': '', 'kb.project': '', 'kb.apiKeyValue': '',
+  };
+
+  function el(tag, attrs, children) {
+    const e = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (k === 'class') e.className = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    });
+    (children || []).forEach((c) => e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+    return e;
+  }
+
+  async function api(path, opts) {
+    const res = await fetch(path, Object.assign({ headers: { 'x-wizard-token': TOKEN, 'Content-Type': 'application/json' } }, opts));
+    return res.json();
+  }
+
+  function renderSteps() {
+    const bar = document.getElementById('steps');
+    bar.innerHTML = '';
+    STEP_NAMES.forEach((name, i) => {
+      const cls = i === step ? 'active' : i < step ? 'done' : '';
+      bar.appendChild(el('span', { class: cls }, [`${i + 1}. ${name}`]));
+    });
+  }
+
+  function field(labelText, inputEl, hint) {
+    const wrap = el('div', {}, [el('label', {}, [labelText]), inputEl]);
+    if (hint) wrap.appendChild(el('div', { class: 'hint' }, [hint]));
+    return wrap;
+  }
+
+  function textInput(key, type) {
+    const i = el('input', { type: type || 'text', value: answers[key] == null ? '' : answers[key] });
+    i.addEventListener('input', () => { answers[key] = i.value; });
+    return i;
+  }
+
+  function numberInput(key) {
+    const i = el('input', { type: 'number', value: answers[key] });
+    i.addEventListener('input', () => { answers[key] = Number(i.value); });
+    return i;
+  }
+
+  function selectInput(key, options) {
+    const s = el('select', {});
+    options.forEach((o) => {
+      const opt = el('option', { value: o }, [o]);
+      if (answers[key] === o) opt.setAttribute('selected', 'selected');
+      s.appendChild(opt);
+    });
+    s.addEventListener('change', () => { answers[key] = s.value; });
+    return s;
+  }
+
+  function checkbox(key, labelText) {
+    const i = el('input', { type: 'checkbox' });
+    i.checked = !!answers[key];
+    i.addEventListener('change', () => { answers[key] = i.checked; });
+    return el('div', { class: 'checkbox-row' }, [i, el('label', {}, [labelText])]);
+  }
+
+  function renderProjectStep(card) {
+    card.appendChild(el('h2', {}, ['Project basics']));
+    card.appendChild(field('Project name', textInput('name'), 'Shown in reports. e.g. "My Storefront".'));
+    card.appendChild(field('Login mode', selectInput('login.mode', ['session', 'fresh']),
+      'session = reuse a saved login between runs; fresh = always log in.'));
+    const row = el('div', { class: 'row' }, [
+      field('Browser', selectInput('playwright.browser', ['chromium', 'chrome', 'firefox', 'webkit', 'msedge'])),
+      field('Launch mode', selectInput('playwright.mode', ['headless', 'headed'])),
+    ]);
+    card.appendChild(row);
+    card.appendChild(field('Parallel workers', numberInput('playwright.workers'), 'Used for parallel regression runs (1-16).'));
+    card.appendChild(checkbox('playwright.dashboard', 'Generate an HTML dashboard after each run'));
+  }
+
+  function renderEnvStep(card) {
+    card.appendChild(el('h2', {}, ['Environment']));
+    card.appendChild(field('Environment name', textInput('envName'), 'Lowercase letters/digits/-/_ only, e.g. "dev".'));
+    card.appendChild(field('Portal URL', textInput('portalUrl', 'url'), 'The URL under test, e.g. https://staging.example.com'));
+    const row = el('div', { class: 'row' }, [
+      field('Default OTP', textInput('defaults.otp'), 'Shared test OTP, not a real secret.'),
+      field('Default password', textInput('defaults.password'), 'Shared disposable test password.'),
+    ]);
+    card.appendChild(row);
+  }
+
+  function renderUsersStep(card) {
+    card.appendChild(el('h2', {}, ['Test users']));
+    card.appendChild(el('div', { class: 'hint' }, ['Disposable test accounts only — never real personal data.']));
+    const list = el('div', {});
+    answers.users.forEach((u, idx) => {
+      const uc = el('div', { class: 'user-card' });
+      if (answers.users.length > 1) {
+        uc.appendChild(el('button', { class: 'remove', onclick: () => { answers.users.splice(idx, 1); rerender(); } }, ['Remove']));
+      }
+      const mk = (key, ph) => {
+        const i = el('input', { type: 'text', placeholder: ph, value: u[key] || '' });
+        i.addEventListener('input', () => { u[key] = i.value; });
+        return i;
+      };
+      uc.appendChild(field('Handle (key)', mk('handle', 'valid_user')));
+      const row = el('div', { class: 'row' }, [
+        field('Phone', mk('phone', '0550000001')),
+        field('Email', mk('email', 'optional')),
+      ]);
+      uc.appendChild(row);
+      const row2 = el('div', { class: 'row' }, [
+        field('Role', mk('role', 'optional')),
+        field('Notes', mk('notes', 'optional')),
+      ]);
+      uc.appendChild(row2);
+      list.appendChild(uc);
+    });
+    card.appendChild(list);
+    card.appendChild(el('button', { class: 'ghost', onclick: () => { answers.users.push({ handle: '', phone: '', email: '', role: '', notes: '' }); rerender(); } }, ['+ Add user']));
+  }
+
+  function renderIntegrationsStep(card) {
+    card.appendChild(el('h2', {}, ['Integrations (optional)']));
+    card.appendChild(el('div', { class: 'hint' }, ['Leave a section blank to skip it. Secret values are written straight to a local .env file, never shown again.']));
+
+    card.appendChild(el('h3', {}, ['Database']));
+    card.appendChild(field('Server', textInput('db.server'), 'e.g. localhost or db.internal'));
+    const dbRow = el('div', { class: 'row' }, [
+      field('Port', numberInput('db.port')),
+      field('Database name', textInput('db.name')),
+    ]);
+    card.appendChild(dbRow);
+    const dbRow2 = el('div', { class: 'row' }, [
+      field('DB user', textInput('db.user')),
+      field('DB password env var', textInput('db.passwordEnvVar')),
+    ]);
+    card.appendChild(dbRow2);
+    card.appendChild(field('DB password (optional, written to .env)', textInput('db.passwordValue', 'password')));
+
+    card.appendChild(el('h3', {}, ['API']));
+    card.appendChild(field('API base URL', textInput('api.baseUrl', 'url')));
+    const apiRow = el('div', { class: 'row' }, [
+      field('API token env var', textInput('api.tokenEnvVar')),
+      field('API token (optional, written to .env)', textInput('api.tokenValue', 'password')),
+    ]);
+    card.appendChild(apiRow);
+
+    card.appendChild(el('h3', {}, ['Knowledge base']));
+    const kbRow = el('div', { class: 'row' }, [
+      field('KB base URL', textInput('kb.baseUrl', 'url')),
+      field('KB project', textInput('kb.project')),
+    ]);
+    card.appendChild(kbRow);
+    card.appendChild(field('KB API key (optional, written to .env as KB_ASK_API_KEY)', textInput('kb.apiKeyValue', 'password')));
+  }
+
+  function maskSecretsForPreview(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function renderReviewStep(card) {
+    card.appendChild(el('h2', {}, ['Review & save']));
+    const preview = el('div', { id: 'preview' }, ['Building preview\u2026']);
+    card.appendChild(preview);
+    fetch('/api/config', { headers: { 'x-wizard-token': TOKEN } }).then(() => {});
+    updatePreview();
+
+    const errBox = el('div', { id: 'errbox' });
+    card.appendChild(errBox);
+
+    const saveBtn = el('button', { class: 'primary', onclick: onSave }, ['Save configuration']);
+    card.appendChild(el('div', { class: 'actions' }, [el('div'), saveBtn]));
+
+    function updatePreview() {
+      preview.innerHTML = '';
+      // Client-side build mirrors engine.js buildConfigs() closely enough for an honest preview;
+      // the server re-derives and re-validates everything independently before writing anything.
+      const project = {
+        name: answers.name || 'my-project',
+        defaultEnvironment: answers.envName || 'dev',
+        login: { mode: answers['login.mode'] },
+        playwright: {
+          browser: answers['playwright.browser'], mode: answers['playwright.mode'],
+          persistent: answers['playwright.persistent'], dashboard: answers['playwright.dashboard'],
+          workers: answers['playwright.workers'],
+        },
+      };
+      const env = {
+        portalUrl: answers.portalUrl,
+        defaults: { otp: answers['defaults.otp'], password: answers['defaults.password'] },
+        users: Object.fromEntries((answers.users || []).filter(u => u.handle).map(u => [u.handle, {
+          ...(u.phone ? { phone: u.phone } : {}), ...(u.email ? { email: u.email } : {}),
+          ...(u.role ? { role: u.role } : {}), ...(u.notes ? { notes: u.notes } : {}),
+        }])),
+      };
+      if (answers['db.server']) env.db = { server: answers['db.server'], port: answers['db.port'], name: answers['db.name'], user: answers['db.user'], password: { envSecret: answers['db.passwordEnvVar'] } };
+      if (answers['api.baseUrl']) env.api = { baseUrl: answers['api.baseUrl'], token: { envSecret: answers['api.tokenEnvVar'] } };
+
+      preview.appendChild(el('p', { class: 'hint' }, [`config/project.json`]));
+      preview.appendChild(el('pre', { class: 'review' }, [JSON.stringify(maskSecretsForPreview(project), null, 2)]));
+      preview.appendChild(el('p', { class: 'hint' }, [`config/environments/${answers.envName || 'dev'}.json`]));
+      preview.appendChild(el('pre', { class: 'review' }, [JSON.stringify(maskSecretsForPreview(env), null, 2)]));
+    }
+
+    async function onSave() {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving\u2026';
+      errBox.innerHTML = '';
+      const result = await api('/api/save', { method: 'POST', body: JSON.stringify(answers) });
+      if (!result.ok) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save configuration';
+        errBox.appendChild(el('div', { class: 'errors' }, [
+          el('strong', {}, ['Please fix the following:']),
+          el('ul', {}, (result.errors || [result.error || 'Unknown error']).map((e) => el('li', {}, [e]))),
+        ]));
+        return;
+      }
+      renderSuccess(result.filesWritten || []);
+    }
+  }
+
+  function renderSuccess(filesWritten) {
+    const card = document.getElementById('card');
+    document.getElementById('steps').innerHTML = '';
+    card.innerHTML = '';
+    card.appendChild(el('div', { class: 'success' }, [
+      el('h2', {}, ['\u2705 Configuration saved']),
+      el('p', {}, [filesWritten.length ? `Wrote: ${filesWritten.join(', ')}` : 'Configuration saved.']),
+      el('p', { class: 'hint' }, ['You can close this tab now. Run your tests as usual — e.g. ask Copilot to "Test the login flow".']),
+    ]));
+    api('/api/done', { method: 'POST' }).catch(() => {});
+    setTimeout(() => { try { window.close(); } catch (e) {} }, 400);
+  }
+
+  function validateStep() {
+    if (step === 0) return answers.name.trim() ? [] : ['Project name is required.'];
+    if (step === 1) {
+      const errs = [];
+      if (!/^[a-z0-9][a-z0-9_-]{0,30}$/.test(answers.envName)) errs.push('Environment name must be lowercase letters/digits/-/_.');
+      try { new URL(answers.portalUrl); } catch { errs.push('Portal URL must be a valid URL.'); }
+      return errs;
+    }
+    if (step === 2) {
+      const users = answers.users.filter(u => u.handle && u.handle.trim());
+      return users.length ? [] : ['At least one test user with a handle is required.'];
+    }
+    return [];
+  }
+
+  function rerender() {
+    renderSteps();
+    const card = document.getElementById('card');
+    card.innerHTML = '';
+    if (step === 0) renderProjectStep(card);
+    else if (step === 1) renderEnvStep(card);
+    else if (step === 2) renderUsersStep(card);
+    else if (step === 3) renderIntegrationsStep(card);
+    else renderReviewStep(card);
+
+    if (step < STEP_NAMES.length - 1) {
+      const back = el('button', { class: 'secondary', onclick: () => { step--; rerender(); } }, ['Back']);
+      back.disabled = step === 0;
+      const next = el('button', { class: 'primary', onclick: () => {
+        const errs = validateStep();
+        if (errs.length) { alert(errs.join('\n')); return; }
+        step++; rerender();
+      } }, ['Next']);
+      card.appendChild(el('div', { class: 'actions' }, [back, next]));
+    }
+    card.appendChild(el('div', { class: 'fine' }, [`Project root: ${PROJECT_ROOT}`]));
+  }
+
+  async function init() {
+    try {
+      const res = await api('/api/config?env=' + encodeURIComponent(answers.envName));
+      if (res.ok) {
+        existing = res;
+        if (res.project && res.project.name) answers.name = res.project.name;
+        if (res.envName) answers.envName = res.envName;
+      }
+    } catch (e) { /* fine to start fresh */ }
+    rerender();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -64,6 +64,10 @@ which mirrors upstream AgenTeX's `/init-test` command — it creates a starting
 `test/` folder, all idempotent (safe to re-run, never overwrites). Add your own test specs
 under `test/` (any structure works — group stateful scenarios into the same file).
 
+Prefer filling in `portalUrl`, test users, and other values through a form instead of editing
+JSON? The skill also offers to launch the optional [Setup Wizard](./setup-wizard.md), a local
+browser UI.
+
 ## 4. Set permissions
 
 Grant Copilot agent mode terminal access for Playwright (and `curl`/`sqlcmd` if you use
