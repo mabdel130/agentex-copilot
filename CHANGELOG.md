@@ -2,6 +2,25 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.7.0] — 2026-09-19
+
+### Added
+- Setup Wizard MVP (`skills/init-test/scripts/wizard/{engine.js,server.js,ui.html}`): an
+  optional, zero-dependency local browser UI offered as a step of the `init-test` skill for
+  filling in `config/project.json` and `config/environments/<env>.json` instead of hand-editing
+  JSON. Ported from upstream AgenTeX's `scripts/wizard/` as an MVP subset scoped to this
+  plugin's current config shape — English only, one environment at a time, no AI text
+  extraction, no `azure`/`figma` schema. Secrets typed into the form are written straight to a
+  local `.env` file over `127.0.0.1`, never echoed to the page or this chat session.
+- `docs/setup-wizard.md`, documenting the wizard's scope, usage, and file outputs.
+- `checks/wizard-engine.test.js` and `checks/wizard-server.test.js`: focused Node tests for the
+  wizard's pure config-mapping/validation logic and small server helpers.
+
+### Changed
+- `skills/init-test/SKILL.md` now offers the Setup Wizard as an optional step after scaffolding.
+- `docs/COPILOT_EQUIVALENTS.md` updated: the "Setup wizard" and `scripts/wizard/` rows now
+  reflect that an MVP has been ported, rather than "not copied."
+
 ## [2.6.7] — 2026-09-18
 
 ### Added

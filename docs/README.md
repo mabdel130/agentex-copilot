@@ -7,6 +7,7 @@
 | [Using GitHub Copilot](./using-github-copilot.md) | Copilot CLI basics for this plugin. |
 | [Getting started](./getting-started.md) | Install, configure, and run a first test. |
 | [Configuration](./configuration.md) | Project, environment, and secret configuration. |
+| [Setup Wizard](./setup-wizard.md) | Optional browser UI to fill in project/environment config. |
 | [Browser testing](./browser-testing.md) | Sequential and parallel browser QA. |
 | [Performance](./performance.md) | Speed up runs: fast-path runner, login reuse, worker tuning, context hygiene. |
 | [API and DB steps](./api-db-steps.md) | Catalog-only integration checks. |
