@@ -19,6 +19,7 @@ natural-language trigger during a run.
 |---|---|
 | **[browser-testing](./browser-testing/SKILL.md)** | The primary entry point for testing a web application. The invoking Copilot session follows the `test-orchestrator` / `qa-executor` roles for real Playwright execution, sequential approvals or autonomous parallel regression, evidence capture, and durable run reports. |
 | **[init-test](./init-test/SKILL.md)** | Scaffolds `config/project.json`, `config/environments/dev.json`, `.env`, an `integration/` catalog with sample API/DB entries, and starter `test/suite1/` specs (only when the project has none of its own) — idempotent, never overwrites. The Copilot-native equivalent of upstream's `/init-test` command. |
+| **[update-plugin](./update-plugin/SKILL.md)** | Reminds the user to run `copilot plugin update agentex-copilot`, then runs a versioned migration engine (`scripts/migrate.js` + `scripts/migrations/`) that upgrades a consumer project's `.agentex/version.json` stamp forward — a git-clean-tree-gated, currently no-op-but-tested engine ready for this port's own future schema changes. The Copilot-native equivalent of upstream's `/update-agentex` command. |
 | **[api-integration](./api-integration/SKILL.md)** | Executes user-defined API calls from the project's `integration/*_api.json` catalog for `api:` test-spec steps — never an improvised HTTP request. Bundled runner: `scripts/run_api.js`. |
 | **[db-integration](./db-integration/SKILL.md)** | Executes user-defined database queries from `integration/*_db.json` for `db:` steps (SQL Server via `sqlcmd`) — catalog-only, DDL always refused. Bundled runner: `scripts/run_db.js`. |
 | **[ask-kb](./ask-kb/SKILL.md)** | Answers `kb:` steps by querying the project's Knowledge Base Ask API. Advisory context only — never PASS/FAIL evidence. Bundled runner: `scripts/ask_kb.js`. |
@@ -38,6 +39,10 @@ Several skills above share code rather than duplicating it, at the plugin root:
 - **`../scripts/lib/project_config.js`** — the one place that knows where project data lives
   (`config/project.json`, `config/environments/<env>.json`, `.env`). Used by api-integration,
   db-integration, ui-check, and the tracker layer below.
+- **`../scripts/lib/version_stamp.js`** — reads/writes a consumer project's
+  `.agentex/version.json` stamp and the installed plugin's own version. Used by `init-test`
+  (stamps a freshly-scaffolded project as current) and `update-plugin` (advances the stamp as
+  migrations run).
 - **`../scripts/lib/tracker/`** — a provider-neutral Azure DevOps REST client (built-in `fetch`,
   no `az` CLI, no dependencies) with a fail-closed write ledger (`ledger.js`) and a per-project
   field/picklist cache (`cache.js`). Used by test-design's `testplan.js` and all of
@@ -63,10 +68,12 @@ for the command-by-command mapping.
   were smoke-tested manually during the port (catalog lookups, DDL bans, config-resolution
   chains, and the HTML/JSON generators all verified against real inputs), but there's no
   automated regression suite here yet.
-- Upstream's `init-test` Setup Wizard (a local bilingual web UI for interactive config) and its
-  `update-agentex` self-migration engine are intentionally not ported — see
+- Upstream's `init-test` Setup Wizard (a local bilingual web UI for interactive config) is
+  intentionally not ported in full (an English-only MVP is, under `skills/init-test/`) — see
   [`../docs/CONVERSION_REPORT.md`](../docs/CONVERSION_REPORT.md#closing-the-command-equivalent-gaps)
-  for why.
+  for why. Upstream's `update-agentex` self-migration engine is ported as `update-plugin`, but
+  scoped to this port's own (currently single) config schema rather than a translation of
+  upstream's Claude-specific migration history — see that same section.
 
 ## Adding or updating a skill
 

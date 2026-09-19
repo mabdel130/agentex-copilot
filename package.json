@@ -1,6 +1,6 @@
 {
   "name": "agentex-copilot",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Agentic QA for GitHub Copilot, ported from AgenTeX. Use `copilot plugin marketplace add mabdel130/agentex-copilot`, then `copilot plugin install agentex-copilot@agentex-copilot` if you have the Copilot CLI; otherwise run `npx github:mabdel130/agentex-copilot` inside the project you want to test as a fallback.",
   "license": "MIT",
   "private": true,

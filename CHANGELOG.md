@@ -2,6 +2,47 @@
 
 All notable changes to AgenTeX for GitHub Copilot are documented here.
 
+## [2.8.0] — 2026-09-19
+
+### Added
+- New bundled script `scripts/merge-permissions.js` (+ pure logic in
+  `scripts/lib/permissions_merge.js`) — automates persisting tool approvals into a consumer
+  project's `~/.copilot/permissions-config.json`, instead of hand-copying
+  `config/copilot-permissions-config.example.json`. Resolves the project's git root, reads the
+  same recommended command list as the example file, adds only what's missing (idempotent,
+  safe to re-run), supports `--with-azure` and `--dry-run`, and never adds a `write` or
+  destructive-command approval — the file format has no deny concept, confirmed against
+  GitHub's own `permissions-config.json` schema docs, so keeping the *allow* side narrow is the
+  only protection available there. Covered by `checks/permissions-merge.test.js`.
+- New shared library `scripts/lib/version_stamp.js` — reads/writes a consumer project's
+  `.agentex/version.json` stamp and the installed plugin's own `plugin.json` version. Used by
+  both `init-test` and `update-plugin` so there is one definition of the stamp format.
+- `skills/init-test/scripts/init.js` now writes `.agentex/version.json` right after scaffolding
+  (never overwriting an existing stamp), so a freshly-initialized project is immediately
+  recognized as current by `update-plugin` without an extra run — closing a gap found while
+  comparing against upstream's own `scripts/init.js`, which stamps at scaffold time for the
+  same reason.
+- New skill `skills/update-plugin/` — the Copilot-native equivalent of upstream AgenTeX's
+  `/update-agentex` command. Reminds the user to run `copilot plugin update agentex-copilot`
+  (plugin-version freshness itself is left to the CLI, not reimplemented), then runs a
+  versioned migration engine (`scripts/migrate.js` + `scripts/engine.js` +
+  `scripts/migrations/`) that stamps a consumer project's `.agentex/version.json` forward.
+  Zero migrations are registered yet — this port has had one `config/` schema since v2.0.0 —
+  but the engine's version-range selection, ordering, manual/failed handling, stamp-withholding,
+  and git-clean-tree gate are real and covered by `checks/update-plugin-engine.test.js`.
+- `skills/update-plugin/scripts/migrations/README.md`, documenting how to add a migration when
+  this port's own config schema eventually changes.
+- `checks/version-stamp.test.js` covering the new shared stamp library.
+
+### Changed
+- `DEPLOYMENT.md` step 7 and `README.md`'s permissions section now lead with
+  `scripts/merge-permissions.js` as the recommended way to persist tool approvals, keeping the
+  manual copy-paste template as a fallback.
+- `skills/README.md`, `docs/COPILOT_EQUIVALENTS.md`, and `docs/CONVERSION_REPORT.md` updated:
+  `update-agentex` moves from "intentionally not ported" to "closed in a later pass."
+- `skills/init-test/SKILL.md` and `skills/update-plugin/SKILL.md` cross-reference the shared
+  version stamp.
+
 ## [2.7.0] — 2026-09-19
 
 ### Added

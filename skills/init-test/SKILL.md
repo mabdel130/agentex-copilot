@@ -73,6 +73,7 @@ agent judgment — run it, then explain the results and next steps to the user.
 | `integration/sample_db.json` | `../db-integration/templates/sample_db.json` | Example cataloged DB entries for `db:` steps |
 | `test/README.md`, `test/suite1/*.md` | this plugin's `test/` folder | Starter specs — **only seeded if `test/` doesn't already exist or is empty**; a project with its own specs under `test/` is left completely untouched |
 | `.gitignore` entries | appended, not overwritten | `.env`, `.env.*`, `!.env.example`, `executions/*`, `!executions/README.md`, `test/.auth/` |
+| `.agentex/version.json` | generated (installed plugin's `plugin.json` version) | Records the agentex-copilot version this project was last scaffolded/migrated at, so the `update-plugin` skill can tell it's current without an extra run — never overwritten if already present |
 
 `scripts/wizard/server.js` (+ `engine.js`, `ui.html`) is the optional Setup Wizard from step 4
 above — it doesn't scaffold new files itself, it fills in the values of the files `init.js`

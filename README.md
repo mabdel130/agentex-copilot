@@ -188,10 +188,11 @@ copilot \
 ```
 
 See [`DEPLOYMENT.md`](./DEPLOYMENT.md#7-grant-tool-permissions) for the full flag list (including
-the optional Azure DevOps commands) and for
-[`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json),
-a template you can merge into `~/.copilot/permissions-config.json` to persist these approvals
-instead of passing flags every session.
+the optional Azure DevOps commands). To persist these approvals instead of passing flags every
+session, run `node scripts/merge-permissions.js /path/to/your-project` (add `--with-azure` if
+needed) — it merges the same commands into `~/.copilot/permissions-config.json` for you — or
+copy [`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json)
+by hand.
 
 Do not grant blanket access to secrets. In particular, keep `.env` values private and do not
 approve actions that display them in terminal output.
