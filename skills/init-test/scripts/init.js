@@ -6,6 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
+const { readInstalledVersion, readStamp, writeStamp } = require(
+  path.join('..', '..', '..', 'scripts', 'lib', 'version_stamp.js')
+);
+
 const pluginRoot = path.resolve(__dirname, '..', '..', '..'); // skills/init-test/scripts -> plugin root
 const targetRoot = process.cwd();
 
@@ -88,6 +92,18 @@ if (!testHasContent) {
 }
 
 appendGitignore(['.env', '.env.*', '!.env.example', 'executions/*', '!executions/README.md', 'test/.auth/']);
+
+// Version stamp — written at scaffold time so the update-plugin skill can later tell this
+// project is current without an extra run. Never overwritten if a stamp already exists (a
+// pre-existing stamp means this ran again on an already-set-up project — its real recorded
+// version must not be silently reset to "just scaffolded").
+const stamp = readStamp(targetRoot);
+if (!stamp.existed) {
+  writeStamp(stamp.path, readInstalledVersion(pluginRoot));
+  created.push('.agentex/version.json');
+} else {
+  skipped.push('.agentex/version.json');
+}
 
 console.log(`\nagentex-copilot init-test — scaffolded ${targetRoot}\n`);
 if (created.length) {

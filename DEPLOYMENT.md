@@ -181,10 +181,23 @@ in a shell alias/function so you don't retype it per session.
 **Alternative: persist approvals instead of passing flags every time.** Copilot CLI saves
 per-repo tool approvals to `permissions-config.json` (default `~/.copilot/permissions-config.json`,
 keyed by the absolute path of your project's Git root — not something this repo can ship
-pre-filled). [`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json)
-has a ready-to-merge `tool_approvals` block covering the same commands as above; swap in your own
-path and merge it into any existing entry there. This file format has no deny concept for
-commands or writes, so still pass the `--deny-tool` flags above (or answer "deny" rather than
+pre-filled). Two ways to populate it:
+
+- **Automated (recommended):** run the bundled merge script from your consumer project (or pass
+  its path):
+  ```bash
+  node <path to installed plugin>/scripts/merge-permissions.js /path/to/your-project
+  ```
+  Add `--with-azure` if you use the `azure-integration`/`task-estimation`/`test-design` skills'
+  `az` calls; add `--dry-run` to preview without writing. It resolves your project's git root,
+  reads the same command list as `config/copilot-permissions-config.example.json`, adds only
+  what's missing (never touches an existing `write` or destructive-command approval, and never
+  adds one itself), and is safe to re-run any time — already-approved identifiers are skipped.
+- **Manual:** [`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json)
+  has the same `tool_approvals` block ready to copy-paste; swap in your own path and merge it
+  into any existing entry there.
+
+This file format has no deny concept for commands or writes, so still pass the `--deny-tool` flags above (or answer "deny" rather than
 "don't ask again" at the write prompt when protecting your app's `src/`) — it only saves you from
 re-approving the *allow* side every session.
 

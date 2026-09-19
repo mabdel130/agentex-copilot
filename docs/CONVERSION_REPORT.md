@@ -284,15 +284,27 @@ already existed via the skill it delegated to. What was actually missing, closed
   for interactively filling config. This is Claude-Code-specific tooling (spawning a local
   server + opening a browser from an agent's Bash tool) with no equivalent invocation model in
   Copilot CLI/Chat, and scaffolding via plain files (this port's actual `init-test`) covers the
-  same end state without it.
+  same end state without it. (An English-only MVP subset was later ported anyway, under
+  `skills/init-test/scripts/wizard/` — see the "Setup wizard" row in
+  [`COPILOT_EQUIVALENTS.md`](./COPILOT_EQUIVALENTS.md).)
+
+**Closed in a later pass:**
+
 - **`update-agentex`** — upstream's self-migration engine (`scripts/migrate.js` +
   `scripts/lib/migrations/`) detects a consumer project's scaffold version and migrates it
   forward across upstream's own scaffold history (legacy `.env`-only → `environments/` →
   `config/`, etc.). That history is specific to *upstream's* schema evolution — this port has
-  had exactly one config shape since v2.0.0, so there is nothing yet to migrate *from*. If this
-  port's own `config/` schema changes in a way that breaks existing consumer projects, a
-  same-spirit migration skill should be built then, scoped to this port's actual history, not a
-  translation of upstream's.
+  had exactly one config shape since v2.0.0, so there was nothing yet to migrate *from*. Rather
+  than leave this permanently unported, it was closed as a same-spirit engine scoped to this
+  port's own history: [`skills/update-plugin/SKILL.md`](../skills/update-plugin/SKILL.md) +
+  `scripts/migrate.js` + `scripts/migrations/` (empty registry, versioned stamp at
+  `.agentex/version.json`, git-clean-tree gate, `node --test`-covered selection/ordering/abort
+  logic in `scripts/engine.js`). It ships as a scaffold — a tested no-op until this port's own
+  `config/` schema actually changes — rather than a translation of upstream's Claude-specific
+  migration steps, which don't apply here. Plugin-version *freshness checking* itself (upstream's
+  `self_update.js`) is not reimplemented; the skill defers to the CLI's own
+  `copilot plugin update` mechanism instead (see the `self_update.js` row in
+  [`COPILOT_EQUIVALENTS.md`](./COPILOT_EQUIVALENTS.md)).
 
 ## Versioning note
 
