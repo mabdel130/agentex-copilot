@@ -290,6 +290,15 @@ already existed via the skill it delegated to. What was actually missing, closed
 
 **Closed in a later pass:**
 
+- **Reusable Copilot permissions across projects** — Copilot does not allow a plugin manifest
+  to silently grant itself trust, and persistent `permissions-config.json` approvals are keyed
+  by project path. This port therefore adds an explicit user-level launcher:
+  [`skills/setup-permissions/SKILL.md`](../skills/setup-permissions/SKILL.md) invokes
+  `scripts/install-global-launcher.js`, which installs `agentex` with the same narrow
+  Playwright/Node allow rules and destructive-command denials documented in `DEPLOYMENT.md`.
+  Azure rules remain opt-in, `/allow-all` and persistent writes are never used, and each new
+  project retains Copilot's own directory-trust prompt.
+
 - **`update-agentex`** — upstream's self-migration engine (`scripts/migrate.js` +
   `scripts/lib/migrations/`) detects a consumer project's scaffold version and migrates it
   forward across upstream's own scaffold history (legacy `.env`-only → `environments/` →

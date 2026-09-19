@@ -175,8 +175,24 @@ same config files (and any secrets straight to `.env`).
 ### 3. Allow the required Copilot tools
 
 Copilot's tool-approval and directory-trust prompts are a deliberate security boundary, so the
-plugin can't grant itself filesystem/shell/browser access — you approve it once per machine. The
-fastest way is to launch with pre-approved/denied flags:
+plugin can't silently grant itself filesystem/shell/browser access. For reusable safe defaults
+across projects, install the bundled user-level launcher once:
+
+```bash
+node scripts/install-global-launcher.js --dry-run
+node scripts/install-global-launcher.js
+```
+
+When the plugin is installed rather than cloned, ask Copilot **"Set up reusable AgenTeX
+permissions"**; the bundled `setup-permissions` skill resolves the installed plugin path and
+runs the same preview-first workflow.
+
+Then start Copilot from any project with `agentex`. Use `agentex --with-azure` to include the
+optional read-only Azure command rules, `agentex --dry-run` to inspect the exact CLI arguments,
+or `agentex --uninstall` to remove the launcher. Each new project still requires Copilot's
+separate directory-trust confirmation.
+
+If you do not want the launcher, start Copilot directly with pre-approved/denied flags:
 
 ```bash
 copilot \
@@ -187,10 +203,9 @@ copilot \
   --deny-tool="shell(git push*)"
 ```
 
-See [`DEPLOYMENT.md`](./DEPLOYMENT.md#7-grant-tool-permissions) for the full flag list (including
-the optional Azure DevOps commands). To persist these approvals instead of passing flags every
-session, run `node scripts/merge-permissions.js /path/to/your-project` (add `--with-azure` if
-needed) — it merges the same commands into `~/.copilot/permissions-config.json` for you — or
+See [`DEPLOYMENT.md`](./DEPLOYMENT.md#7-grant-tool-permissions) for the full flag list. To
+persist approvals for one project while continuing to launch plain `copilot`, run
+`node scripts/merge-permissions.js /path/to/your/project` (add `--with-azure` if needed), or
 copy [`config/copilot-permissions-config.example.json`](./config/copilot-permissions-config.example.json)
 by hand.
 

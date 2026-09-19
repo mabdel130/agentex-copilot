@@ -5,6 +5,11 @@ All notable changes to AgenTeX for GitHub Copilot are documented here.
 ## [2.8.0] — 2026-09-19
 
 ### Added
+- New `setup-permissions` skill and `scripts/install-global-launcher.js` installer for a
+  user-level `agentex` command. The launcher applies AgenTeX's narrow Playwright/Node allow
+  rules and destructive-command denials from any project, supports opt-in Azure rules,
+  dry-run, and self-uninstall, refuses to overwrite unrelated launchers, and deliberately
+  leaves Copilot's per-project directory trust boundary intact.
 - New bundled script `scripts/merge-permissions.js` (+ pure logic in
   `scripts/lib/permissions_merge.js`) — automates persisting tool approvals into a consumer
   project's `~/.copilot/permissions-config.json`, instead of hand-copying

@@ -70,9 +70,21 @@ browser UI.
 
 ## 4. Set permissions
 
-Grant Copilot agent mode terminal access for Playwright (and `curl`/`sqlcmd` if you use
-`api:`/`db:` steps), and deny reads of `.env`. See
-[DEPLOYMENT.md, "Grant tool permissions"](../DEPLOYMENT.md#grant-tool-permissions).
+For reusable safe tool rules in every project, install the user-level launcher once:
+
+```bash
+node <installed-plugin-path>/scripts/install-global-launcher.js --dry-run
+node <installed-plugin-path>/scripts/install-global-launcher.js
+```
+
+You can also ask Copilot **"Set up reusable AgenTeX permissions"** to invoke the bundled
+`setup-permissions` skill, which resolves that installed path for you.
+
+Start future sessions with `agentex` instead of `copilot`; use `agentex --with-azure` only when
+the Azure skills are needed. Copilot still asks you to trust each new project directory, which
+is a separate security boundary. See
+[DEPLOYMENT.md, "Grant tool permissions"](../DEPLOYMENT.md#grant-tool-permissions) for the
+launcher, direct CLI flags, and per-project persistent-approval alternatives.
 
 ## 5. Run your first test
 

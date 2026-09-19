@@ -141,7 +141,35 @@ so they inherit these capabilities from the Copilot runtime — Copilot's tool-a
 directory-trust prompts are a deliberate security boundary, so nothing in this plugin can grant
 itself these permissions silently; you grant them once, the same way for every plugin.
 
-**Recommended: launch with pre-approved/denied flags.** `--allow-tool` and `--deny-tool` accept
+**Recommended for use across projects: install the user-level launcher once.**
+
+```bash
+node <path to installed plugin>/scripts/install-global-launcher.js --dry-run
+node <path to installed plugin>/scripts/install-global-launcher.js
+```
+
+Alternatively, ask Copilot **"Set up reusable AgenTeX permissions"** to invoke the installed
+`setup-permissions` skill and run this preview-first flow without manually locating the plugin.
+
+The first command previews the user-level files; the second installs the `agentex` command.
+On Windows it installs under `%APPDATA%\npm`, where npm's command shims normally live. On
+macOS/Linux it installs under `~/.local/bin` (which must be on `PATH`). It refuses to overwrite
+an unrelated existing `agentex` command unless you explicitly pass `--force`.
+
+From any project:
+
+```bash
+agentex                 # Playwright/Node rules plus destructive-command denials
+agentex --with-azure    # also include the optional read-only Azure rules
+agentex --dry-run       # print the exact Copilot CLI arguments without launching
+agentex --uninstall     # remove only the AgenTeX-managed launcher
+```
+
+The launcher does **not** use `/allow-all`, grant persistent writes, approve `curl`/`sqlcmd`, or
+trust every directory. The first time you enter a new project, Copilot still asks whether to
+trust that directory; choose "remember" only for projects you trust.
+
+**Alternative: launch with pre-approved/denied flags.** `--allow-tool` and `--deny-tool` accept
 `Kind(pattern)` values; deny always wins over allow. Copy this once (adjust the `az` lines out if
 you don't use the Azure DevOps skills):
 
